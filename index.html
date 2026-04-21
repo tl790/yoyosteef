@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>YoYo — Student Loan Hub</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #0f0f0f; --surface: #181818; --surface2: #222; --border: #2a2a2a; --border2: #333;
+  --text: #f0ede8; --muted: #888; --dim: #555;
+  --green: #4ade80; --green-dim: rgba(74,222,128,0.08); --green-border: rgba(74,222,128,0.2);
+  --purple: #a78bfa; --orange: #fb923c; --blue: #60a5fa;
+  --mono: 'DM Mono', monospace; --sans: 'DM Sans', sans-serif;
+}
+[data-theme="light"] {
+  --bg: #f8f7f4; --surface: #ffffff; --surface2: #f0eeea; --border: #e2ddd6; --border2: #ccc8c0;
+  --text: #1a1917; --muted: #6b6760; --dim: #a09d98;
+  --green-dim: rgba(22,163,74,0.08); --green-border: rgba(22,163,74,0.2);
+}
+body { background: var(--bg); color: var(--text); font-family: var(--sans); font-size: 14px; line-height: 1.6; min-height: 100vh; transition: background .2s, color .2s; }
+
+header { border-bottom: 1px solid var(--border); padding: 18px 40px; display: flex; align-items: center; gap: 14px; }
+header h1 { font-family: var(--mono); font-size: 12px; font-weight: 400; color: var(--muted); letter-spacing: .08em; text-transform: uppercase; }
+header .name { font-family: var(--mono); font-size: 12px; color: var(--purple); }
+.hbtn { margin-left: auto; font-family: var(--mono); font-size: 10px; padding: 4px 12px; border-radius: 3px; border: 1px solid var(--border2); background: transparent; color: var(--muted); cursor: pointer; transition: all .15s; letter-spacing: .04em; }
+.hbtn:hover { color: var(--text); border-color: var(--muted); }
+
+.hero { max-width: 720px; margin: 0 auto; padding: 64px 40px 48px; }
+.welcome-tag { font-family: var(--mono); font-size: 11px; color: var(--green); letter-spacing: .1em; text-transform: uppercase; margin-bottom: 16px; }
+.hero h2 { font-size: 36px; font-weight: 500; color: var(--text); line-height: 1.2; margin-bottom: 16px; }
+.hero h2 .highlight { color: var(--green); }
+.hero p { font-size: 15px; color: var(--muted); line-height: 1.8; max-width: 560px; }
+
+.summary-strip { max-width: 720px; margin: 0 auto 56px; padding: 0 40px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.summary-card { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 14px 16px; }
+.sc-label { font-family: var(--mono); font-size: 10px; color: var(--dim); text-transform: uppercase; letter-spacing: .08em; margin-bottom: 4px; }
+.sc-val { font-family: var(--mono); font-size: 18px; font-weight: 500; }
+.sc-val.red { color: #f87171; }
+.sc-val.green { color: var(--green); }
+.sc-val.purple { color: var(--purple); }
+.sc-sub { font-size: 11px; color: var(--dim); margin-top: 2px; }
+
+.cards { max-width: 720px; margin: 0 auto; padding: 0 40px 80px; display: flex; flex-direction: column; gap: 16px; }
+
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 28px 28px 24px; text-decoration: none; color: inherit; display: block; transition: border-color .2s, transform .15s; position: relative; overflow: hidden; }
+.card:hover { border-color: var(--border2); transform: translateY(-1px); }
+.card.featured { border-color: rgba(74,222,128,0.3); }
+.card.featured:hover { border-color: rgba(74,222,128,0.5); }
+
+.card-num { font-family: var(--mono); font-size: 10px; color: var(--dim); letter-spacing: .08em; margin-bottom: 12px; }
+.card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 12px; }
+.card-title { font-size: 18px; font-weight: 500; color: var(--text); }
+.card-badge { font-family: var(--mono); font-size: 10px; padding: 3px 10px; border-radius: 3px; border: 1px solid; white-space: nowrap; flex-shrink: 0; }
+.badge-green { background: var(--green-dim); color: var(--green); border-color: var(--green-border); }
+.badge-purple { background: rgba(167,139,250,0.08); color: var(--purple); border-color: rgba(167,139,250,0.2); }
+.badge-orange { background: rgba(251,146,60,0.08); color: var(--orange); border-color: rgba(251,146,60,0.2); }
+
+.card-desc { font-size: 14px; color: var(--muted); line-height: 1.7; margin-bottom: 20px; }
+
+.card-features { display: flex; flex-direction: column; gap: 6px; margin-bottom: 22px; }
+.cf { display: flex; align-items: flex-start; gap: 10px; font-size: 13px; color: var(--muted); }
+.cf-dot { width: 4px; height: 4px; border-radius: 50%; background: var(--dim); flex-shrink: 0; margin-top: 7px; }
+
+.card-cta { display: inline-flex; align-items: center; gap: 8px; font-family: var(--mono); font-size: 12px; color: var(--green); letter-spacing: .04em; }
+.card-cta .arrow { transition: transform .15s; }
+.card:hover .arrow { transform: translateX(4px); }
+
+.divider { height: 1px; background: var(--border); max-width: 720px; margin: 0 auto 40px; }
+
+.footer { border-top: 1px solid var(--border); padding: 20px 40px; display: flex; align-items: center; gap: 12px; }
+.footer-text { font-family: var(--mono); font-size: 11px; color: var(--dim); }
+.footer-dot { width: 3px; height: 3px; border-radius: 50%; background: var(--dim); }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Student Loan Hub —</h1>
+  <span class="name">YoYo</span>
+  <button class="hbtn" id="theme-btn" onclick="toggleTheme()">light mode</button>
+</header>
+
+<div class="hero">
+  <div class="welcome-tag">Welcome back</div>
+  <h2>Hi YoYo, <span class="highlight">let's get these loans handled.</span></h2>
+  <p>This is your personal hub for managing the student loan plan we've built together. Three tools below — a financial model to run scenarios, a PSLF enrollment checklist, and a meeting notes sheet for your upcoming Etch Financial call.</p>
+</div>
+
+<div class="summary-strip">
+  <div class="summary-card">
+    <div class="sc-label">Total balance</div>
+    <div class="sc-val red">$721,333</div>
+    <div class="sc-sub">as of April 2026</div>
+  </div>
+  <div class="summary-card">
+    <div class="sc-label">PSLF forgiveness target</div>
+    <div class="sc-val green">April 2036</div>
+    <div class="sc-sub">enroll immediately</div>
+  </div>
+  <div class="summary-card">
+    <div class="sc-label">Est. forgiven tax-free</div>
+    <div class="sc-val purple">~$600K–$1M+</div>
+    <div class="sc-sub">depends on income path</div>
+  </div>
+</div>
+
+<div class="cards">
+
+  <a class="card featured" href="./yoyo_financial_model.html">
+    <div class="card-num">01</div>
+    <div class="card-top">
+      <div class="card-title">Financial model</div>
+      <span class="card-badge badge-green">Interactive</span>
+    </div>
+    <div class="card-desc">Model your loan repayment across three strategies — PSLF, IBR-only, or aggressive payoff — using your actual income numbers. Enter your 2025 and 2026 tax year income to get accurate IBR payments, then use sliders for future year projections.</div>
+    <div class="card-features">
+      <div class="cf"><div class="cf-dot"></div><span>Enter exact income for 2025 and 2026 tax years — IBR recalculates from each year's return</span></div>
+      <div class="cf"><div class="cf-dot"></div><span>See exactly what your monthly payment covers — how much goes to interest vs. principal</span></div>
+      <div class="cf"><div class="cf-dot"></div><span>Year-by-year payment schedule showing when balance grows vs. shrinks</span></div>
+      <div class="cf"><div class="cf-dot"></div><span>Compare PSLF vs. aggressive payoff side by side with total cash paid and forgiveness amount</span></div>
+    </div>
+    <div class="card-cta">Open financial model <span class="arrow">→</span></div>
+  </a>
+
+  <a class="card" href="./yoyo_pslf_checklist.html">
+    <div class="card-num">02</div>
+    <div class="card-top">
+      <div class="card-title">PSLF checklist</div>
+      <span class="card-badge badge-purple">25 items</span>
+    </div>
+    <div class="card-desc">A complete checklist of everything needed to enroll in PSLF properly and protect your eligibility over the 10-year window. Items are tagged by urgency — start with the ASAP items, especially confirming your Tufts hours qualify.</div>
+    <div class="card-features">
+      <div class="cf"><div class="cf-dot"></div><span>Filter by urgency: ASAP, Soon, Annual, or Ongoing tasks</span></div>
+      <div class="cf"><div class="cf-dot"></div><span>Sort by urgency or undone-first to focus on what matters now</span></div>
+      <div class="cf"><div class="cf-dot"></div><span>Check items off as you complete them — progress bar tracks overall completion</span></div>
+      <div class="cf"><div class="cf-dot"></div><span>Includes a separate Perkins Loan Cancellation track (handled through UCSF, not EdFinancial)</span></div>
+    </div>
+    <div class="card-cta">Open checklist <span class="arrow">→</span></div>
+  </a>
+
+  <a class="card" href="./yoyo_meeting_notes.html">
+    <div class="card-num">03</div>
+    <div class="card-top">
+      <div class="card-title">Meeting notes</div>
+      <span class="card-badge badge-orange">Etch Financial</span>
+    </div>
+    <div class="card-desc">16 pre-loaded questions for your upcoming meeting with Etch Financial, organized by priority. Fill in answers live during the call, or go back and fill in after reviewing the recording. Everything autosaves as you type.</div>
+    <div class="card-features">
+      <div class="cf"><div class="cf-dot"></div><span>Questions tagged Critical, Important, or Confirm — so you know where to push hardest</span></div>
+      <div class="cf"><div class="cf-dot"></div><span>Each question has a one-line answer field and a detailed notes area</span></div>
+      <div class="cf"><div class="cf-dot"></div><span>Filter view to see only unanswered questions during the call</span></div>
+      <div class="cf"><div class="cf-dot"></div><span>Save as PDF button adds a date/time stamp — send the PDF back to Tim for follow-up</span></div>
+    </div>
+    <div class="card-cta">Open meeting notes <span class="arrow">→</span></div>
+  </a>
+
+</div>
+
+<div class="footer">
+  <span class="footer-text">tl790.github.io/yoyosteef</span>
+  <div class="footer-dot"></div>
+  <span class="footer-text">built with Tim · Apr 2026</span>
+</div>
+
+<script>
+function toggleTheme() {
+  const html = document.documentElement;
+  const next = html.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+  html.setAttribute('data-theme', next);
+  document.getElementById('theme-btn').textContent = next === 'light' ? 'dark mode' : 'light mode';
+  localStorage.setItem('yoyo-theme', next);
+}
+(function() {
+  const saved = localStorage.getItem('yoyo-theme') || 'dark';
+  document.documentElement.setAttribute('data-theme', saved);
+  window.addEventListener('DOMContentLoaded', function() {
+    const btn = document.getElementById('theme-btn');
+    if (btn) btn.textContent = saved === 'light' ? 'dark mode' : 'light mode';
+  });
+})();
+</script>
+</body>
+</html>
