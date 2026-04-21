@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>YoYo — PSLF Enrollment Checklist</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #0f0f0f; --surface: #181818; --surface2: #222; --border: #2a2a2a; --border2: #333;
+  --text: #f0ede8; --muted: #888; --dim: #555;
+  --green: #4ade80; --green-dim: rgba(74,222,128,0.08); --green-border: rgba(74,222,128,0.2);
+  --red: #f87171; --red-dim: rgba(248,113,113,0.08); --red-border: rgba(248,113,113,0.25);
+  --amber: #fbbf24; --amber-dim: rgba(251,191,36,0.08); --amber-border: rgba(251,191,36,0.25);
+  --blue: #60a5fa; --blue-dim: rgba(96,165,250,0.08); --blue-border: rgba(96,165,250,0.2);
+  --purple: #a78bfa;
+  --mono: 'DM Mono', monospace; --sans: 'DM Sans', sans-serif;
+}
+body { background: var(--bg); color: var(--text); font-family: var(--sans); transition: background .2s, color .2s; font-size: 14px; line-height: 1.5; }
+
+header { border-bottom: 1px solid var(--border); padding: 18px 32px; display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+header h1 { font-family: var(--mono); font-size: 12px; font-weight: 400; color: var(--muted); letter-spacing: .08em; text-transform: uppercase; }
+header .name { font-family: var(--mono); font-size: 12px; color: var(--purple); }
+.header-right { margin-left: auto; display: flex; align-items: center; gap: 14px; }
+.prog-wrap { display: flex; align-items: center; gap: 10px; }
+.prog-outer { width: 140px; height: 3px; background: var(--border2); border-radius: 2px; overflow: hidden; }
+.prog-inner { height: 100%; background: var(--green); border-radius: 2px; transition: width .3s; }
+.prog-text { font-family: var(--mono); font-size: 11px; color: var(--green); min-width: 44px; }
+
+.toolbar { border-bottom: 1px solid var(--border); padding: 10px 32px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.filter-label { font-family: var(--mono); font-size: 10px; color: var(--dim); text-transform: uppercase; letter-spacing: .08em; margin-right: 4px; }
+.filter-btn { font-family: var(--mono); font-size: 11px; padding: 4px 12px; border-radius: 3px; border: 1px solid var(--border2); background: transparent; color: var(--muted); cursor: pointer; transition: all .15s; letter-spacing: .03em; }
+.filter-btn:hover { color: var(--text); border-color: var(--muted); }
+.filter-btn.active { color: var(--text); background: var(--surface2); border-color: var(--border2); }
+.filter-btn.f-asap.active { color: #fca5a5; border-color: var(--red-border); background: var(--red-dim); }
+.filter-btn.f-soon.active { color: #fde68a; border-color: var(--amber-border); background: var(--amber-dim); }
+.filter-btn.f-annual.active { color: #93c5fd; border-color: var(--blue-border); background: var(--blue-dim); }
+.filter-btn.f-ongoing.active { color: rgba(74,222,128,.9); border-color: var(--green-border); background: var(--green-dim); }
+
+.sort-sep { width: 1px; height: 20px; background: var(--border); margin: 0 4px; }
+.sort-btn { font-family: var(--mono); font-size: 11px; padding: 4px 12px; border-radius: 3px; border: 1px solid var(--border2); background: transparent; color: var(--muted); cursor: pointer; transition: all .15s; }
+.sort-btn:hover { color: var(--text); }
+.sort-btn.active { color: var(--text); background: var(--surface2); }
+
+.reset-btn { margin-left: auto; font-family: var(--mono); font-size: 10px; padding: 4px 12px; border-radius: 3px; border: 1px solid var(--border2); background: transparent; color: var(--dim); cursor: pointer; }
+.reset-btn:hover { color: var(--muted); }
+
+.container { max-width: 820px; margin: 0 auto; padding: 28px 32px 60px; display: flex; flex-direction: column; gap: 6px; }
+
+.alert-box { border-radius: 6px; padding: 12px 16px; font-size: 13px; line-height: 1.7; border: 1px solid; margin-bottom: 10px; }
+.alert-box.critical { background: var(--red-dim); border-color: var(--red-border); color: #fca5a5; }
+
+.section-header { display: flex; align-items: center; gap: 12px; padding: 14px 0 8px; }
+.section-num { font-family: var(--mono); font-size: 10px; color: var(--dim); min-width: 18px; }
+.section-title { font-family: var(--mono); font-size: 11px; text-transform: uppercase; letter-spacing: .1em; color: var(--muted); }
+.section-count { margin-left: auto; font-family: var(--mono); font-size: 11px; color: var(--dim); }
+.section-count.done { color: var(--green); }
+
+.item {
+  display: flex; align-items: flex-start; gap: 12px;
+  padding: 13px 14px; border-radius: 6px; cursor: pointer;
+  border: 1px solid transparent; transition: background .1s, border-color .1s;
+  user-select: none;
+}
+.item:hover { background: var(--surface); }
+.item.checked { background: var(--surface); border-color: var(--border); }
+.item.hidden { display: none; }
+
+.checkbox { width: 18px; height: 18px; border: 1.5px solid var(--border2); border-radius: 4px; flex-shrink: 0; margin-top: 1px; display: flex; align-items: center; justify-content: center; transition: all .15s; }
+.item.checked .checkbox { background: var(--green); border-color: var(--green); }
+.checkmark { display: none; width: 10px; height: 10px; }
+.item.checked .checkmark { display: block; }
+.checkmark::before { content: ''; display: block; width: 10px; height: 10px; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'%3E%3Cpath d='M1.5 5l2.5 2.5 4.5-4.5' stroke='%230f0f0f' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); background-size: contain; background-repeat: no-repeat; }
+
+.item-body { flex: 1; min-width: 0; }
+.item-top { display: flex; align-items: flex-start; gap: 8px; flex-wrap: wrap; }
+.item-text { font-size: 13px; font-weight: 500; color: var(--text); flex: 1; line-height: 1.4; transition: color .15s; }
+.item.checked .item-text { color: var(--dim); text-decoration: line-through; text-decoration-color: var(--dim); }
+.item-note { font-size: 12px; color: var(--muted); line-height: 1.6; margin-top: 5px; }
+.item.checked .item-note { color: var(--dim); }
+
+.urgency-tag {
+  font-family: var(--mono); font-size: 9px; text-transform: uppercase;
+  letter-spacing: .07em; padding: 2px 8px; border-radius: 3px;
+  border: 1px solid; flex-shrink: 0; margin-top: 1px; white-space: nowrap;
+}
+.tag-asap { background: var(--red-dim); color: var(--red); border-color: var(--red-border); }
+.tag-soon { background: var(--amber-dim); color: var(--amber); border-color: var(--amber-border); }
+.tag-annual { background: var(--blue-dim); color: var(--blue); border-color: var(--blue-border); }
+.tag-ongoing { background: var(--green-dim); color: var(--green); border-color: var(--green-border); }
+
+.divider { height: 1px; background: var(--border); margin: 4px 0; }
+
+.no-results { padding: 32px; text-align: center; font-family: var(--mono); font-size: 12px; color: var(--dim); }
+[data-theme="light"] {
+  --bg: #f8f7f4; --surface: #ffffff; --surface2: #f0eeea; --border: #e2ddd6; --border2: #ccc8c0;
+  --text: #1a1917; --muted: #6b6760; --dim: #a09d98;
+  --green-dim: rgba(22,163,74,0.08); --green-border: rgba(22,163,74,0.25);
+  --orange-dim: rgba(194,65,12,0.08);
+  --red-dim: rgba(185,28,28,0.08); --red-border: rgba(185,28,28,0.2);
+  --amber-dim: rgba(146,64,14,0.08); --amber-border: rgba(146,64,14,0.2);
+  --blue-dim: rgba(29,78,216,0.08); --blue-border: rgba(29,78,216,0.2);
+}
+[data-theme="light"] input[type=range] { background: var(--border2); }
+[data-theme="light"] input[type=range]::-webkit-slider-thumb { background: var(--text); }
+[data-theme="light"] select { background: var(--surface2); }
+[data-theme="light"] .schedule-table th { background: var(--surface2); }
+[data-theme="light"] textarea { background: var(--surface2); border-color: var(--border2); color: var(--text); }
+[data-theme="light"] .q-block { background: var(--surface); border-color: var(--border); }
+
+.site-nav { border-bottom: 1px solid var(--border); padding: 0 28px; display: flex; align-items: center; gap: 2px; background: var(--bg); }
+.site-nav a { font-family: var(--mono); font-size: 11px; color: var(--dim); text-decoration: none; padding: 9px 14px; border-bottom: 2px solid transparent; transition: color .15s, border-color .15s; letter-spacing: .04em; }
+.site-nav a:hover { color: var(--muted); }
+.site-nav a.active { color: var(--text); border-bottom-color: var(--green); }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>PSLF Checklist —</h1>
+  <span class="name">YoYo</span>
+  <div class="header-right">
+    <div class="prog-wrap">
+      <div class="prog-outer"><div class="prog-inner" id="prog-bar" style="width:0%"></div></div>
+      <span class="prog-text" id="prog-text">0 / 0</span>
+    </div>
+  </div>
+<button id="theme-btn" onclick="toggleTheme()" style="font-family:var(--mono);font-size:10px;padding:3px 10px;border-radius:3px;border:1px solid var(--border2);background:transparent;color:var(--muted);cursor:pointer;letter-spacing:.05em;transition:color .15s">light mode</button>
+</header>
+<nav class="site-nav">
+  <a href="https://tl790.github.io/yoyosteef/yoyo_financial_model.html">Financial model</a>
+  <a href="https://tl790.github.io/yoyosteef/yoyo_pslf_checklist.html" class="active">PSLF checklist</a>
+  <a href="https://tl790.github.io/yoyosteef/yoyo_meeting_notes.html">Meeting notes</a>
+</nav>
+
+<div class="toolbar">
+  <span class="filter-label">Filter:</span>
+  <button class="filter-btn active" data-filter="all" onclick="setFilter('all',this)">All</button>
+  <button class="filter-btn f-asap" data-filter="asap" onclick="setFilter('asap',this)">ASAP</button>
+  <button class="filter-btn f-soon" data-filter="soon" onclick="setFilter('soon',this)">Soon</button>
+  <button class="filter-btn f-annual" data-filter="annual" onclick="setFilter('annual',this)">Annual</button>
+  <button class="filter-btn f-ongoing" data-filter="ongoing" onclick="setFilter('ongoing',this)">Ongoing</button>
+  <div class="sort-sep"></div>
+  <span class="filter-label">Sort:</span>
+  <button class="sort-btn active" data-sort="section" onclick="setSort('section',this)">By section</button>
+  <button class="sort-btn" data-sort="urgency" onclick="setSort('urgency',this)">By urgency</button>
+  <button class="sort-btn" data-sort="status" onclick="setSort('status',this)">Undone first</button>
+  <button class="reset-btn" onclick="resetAll()">Reset all</button>
+</div>
+
+<div class="container" id="container">
+
+  <div class="alert-box critical">
+    2 years of Tufts employment were not enrolled in PSLF and cannot be recovered. Those 24 months are lost. Enroll immediately — every additional month of delay is another qualifying payment permanently missed.
+  </div>
+
+  <div id="items-wrap"></div>
+  <div class="no-results" id="no-results" style="display:none">No items match this filter.</div>
+
+</div>
+
+<script>
+const ITEMS = [
+  {id:1, section:'01 — Confirm eligibility', urgency:'asap', order:1,
+   text:'Confirm Tufts employment meets the 30-hr/week or full-time equivalent threshold',
+   note:'PSLF requires working "full-time" — defined as 30+ hours/week OR the employer\'s definition of full-time. Teaching 2–3 days/week may or may not qualify. This is the single most critical gate. If this fails, the entire PSLF strategy fails. Confirm with Tufts HR before taking any other step.'},
+  {id:2, section:'01 — Confirm eligibility', urgency:'asap', order:2,
+   text:'Confirm Tufts University Health Sciences is the direct employer of record',
+   note:'Must be Tufts itself — not a staffing agency, contractor arrangement, or non-501(c)(3) subsidiary. Check the W-2 employer name. The employer certifying the ECF must be the qualifying entity.'},
+  {id:3, section:'01 — Confirm eligibility', urgency:'asap', order:3,
+   text:'Verify all active loans are Direct federal loans (D1, D2, D3)',
+   note:'Confirmed from NSLDS data: D2 (Stafford Unsubsidized) and D3 (Plus Grad) qualify. Perkins loans (PU) do NOT — handle those separately via Perkins Cancellation with UCSF. Private loans never qualify.'},
+  {id:4, section:'01 — Confirm eligibility', urgency:'ongoing', order:4,
+   text:'Never consolidate with a private lender or refinance federal loans into private',
+   note:'Private refinancing permanently removes loans from PSLF. If consolidation is ever needed, use a Direct Consolidation Loan only — but be aware it resets the qualifying payment count to zero.'},
+
+  {id:5, section:'02 — Repayment plan', urgency:'asap', order:5,
+   text:'Log in to studentaid.gov and confirm current repayment plan is IBR or SAVE',
+   note:'Currently showing as IBR — confirm it is formally active and not paused after the recent forbearance. SAVE is currently under legal challenge; if unavailable, IBR is the safe qualifying fallback.'},
+  {id:6, section:'02 — Repayment plan', urgency:'asap', order:6,
+   text:'Set up auto-pay through EdFinancial to prevent missed payments',
+   note:'Payments must be received within 15 days of due date. Auto-pay also typically provides a 0.25% interest rate reduction. A single missed payment in the wrong month can disqualify that month from PSLF.'},
+  {id:7, section:'02 — Repayment plan', urgency:'ongoing', order:7,
+   text:'Never switch to Standard, Graduated, or Extended repayment',
+   note:'Only qualifying IDR plans count (IBR, SAVE, PAYE, ICR). Non-IDR payments do not count under any circumstances, even if working at a qualifying employer.'},
+
+  {id:8, section:'03 — Employment Certification Form', urgency:'asap', order:8,
+   text:'Submit PSLF Employment Certification Form (ECF) via studentaid.gov — do this today',
+   note:'Go to studentaid.gov → Manage Loans → Public Service Loan Forgiveness. Have Tufts HR complete and sign as authorized official. This is the formal enrollment step. Every month delayed is a qualifying payment lost permanently.'},
+  {id:9, section:'03 — Employment Certification Form', urgency:'soon', order:9,
+   text:'After ECF approval, verify qualifying payment count with EdFinancial',
+   note:'Should show 0 at first enrollment. Screenshot and save this confirmation. If there are any discrepancies later, this is the baseline record.'},
+  {id:10, section:'03 — Employment Certification Form', urgency:'annual', order:10,
+   text:'Submit ECF every 12 months going forward — calendar this now',
+   note:'Annual resubmission is not required but strongly recommended. Catching errors at year 2 is manageable. Catching them at year 9 is catastrophic.'},
+  {id:11, section:'03 — Employment Certification Form', urgency:'ongoing', order:11,
+   text:'Save copies of every submitted and approved ECF permanently (cloud + local)',
+   note:'Servicers have lost records. Her copies are the ultimate proof. Keep PDFs in a dedicated folder with backups.'},
+
+  {id:12, section:'04 — Making qualifying payments', urgency:'soon', order:12,
+   text:'Understand that $0 IBR payments still count as qualifying payments',
+   note:'If income drops and IBR calculates to $0/mo, that month still counts — as long as she is enrolled in IDR and working at a qualifying employer.'},
+  {id:13, section:'04 — Making qualifying payments', urgency:'soon', order:13,
+   text:'Understand that forbearance and deferment months do NOT count toward PSLF',
+   note:'Prior forbearance periods are not credited. Future forbearance pauses the clock but does not reset it. Avoid forbearance unless absolutely necessary.'},
+  {id:14, section:'04 — Making qualifying payments', urgency:'annual', order:14,
+   text:'Re-certify income with EdFinancial every year — IBR recalculates on prior year taxes',
+   note:'Missing recertification can temporarily push payments to a non-qualifying amount. EdFinancial sends reminders — act immediately. Set a calendar alert for each October.'},
+  {id:15, section:'04 — Making qualifying payments', urgency:'soon', order:15,
+   text:'Understand that non-consecutive payments are fine — gaps don\'t reset the counter',
+   note:'If she takes a break from Tufts and returns, prior qualifying payments remain on record. Gaps just don\'t advance the count.'},
+
+  {id:16, section:'05 — Forgiveness at month 120 (Apr 2036)', urgency:'ongoing', order:16,
+   text:'At month 120, submit the PSLF Application for Forgiveness (separate from ECF)',
+   note:'A separate form from the ECF. File via studentaid.gov. Processing takes several months — submit as soon as the 120th payment posts.'},
+  {id:17, section:'05 — Forgiveness at month 120 (Apr 2036)', urgency:'ongoing', order:17,
+   text:'Continue making payments until forgiveness is officially confirmed — do not stop early',
+   note:'Do not stop paying while waiting for approval. If the application is delayed and payments lapse, she risks default.'},
+  {id:18, section:'05 — Forgiveness at month 120 (Apr 2036)', urgency:'ongoing', order:18,
+   text:'Confirm Massachusetts does not tax PSLF forgiveness (verify in 2035)',
+   note:'Federal PSLF forgiveness is 100% tax-free. Most states follow federal treatment but confirm MA treatment with an accountant in 2035, before the forgiveness event.'},
+
+  {id:19, section:'06 — Perkins cancellation (separate track)', urgency:'asap', order:19,
+   text:'Contact UCSF Financial Aid about Perkins Loan Cancellation immediately',
+   note:'$11,727 across two UCSF-held Perkins loans. These are NOT at EdFinancial and are NOT eligible for PSLF. Dental faculty cancellation: 15% per year for years 1–2, 20% for years 3–4, 30% for year 5. UCSF contact: 415-476-4181 or jerry.lopez@ucsf.edu.'},
+  {id:20, section:'06 — Perkins cancellation (separate track)', urgency:'soon', order:20,
+   text:'Apply retroactively for Perkins cancellation for years of teaching already completed',
+   note:'~2 years of teaching may qualify for 15% cancellation already — approximately $1,760 per loan, ~$3,520 total. Apply retroactively. This is completely independent from PSLF and EdFinancial.'},
+  {id:21, section:'06 — Perkins cancellation (separate track)', urgency:'annual', order:21,
+   text:'Submit annual Perkins cancellation for each subsequent teaching year',
+   note:'At 5 years of dental faculty service, 100% of Perkins balance is cancellable. Track separately from PSLF — handled entirely by UCSF.'},
+
+  {id:22, section:'07 — Ongoing record-keeping', urgency:'annual', order:22,
+   text:'Screenshot NSLDS payment count after every ECF approval',
+   note:'Log in to studentaid.gov each year after ECF is approved. Save confirmation showing cumulative qualifying payment count. If counts don\'t match records, dispute immediately with EdFinancial.'},
+  {id:23, section:'07 — Ongoing record-keeping', urgency:'ongoing', order:23,
+   text:'Keep all Tufts W-2s and pay stubs for the full 10 years',
+   note:'Proof of continuous qualifying employment. The IRS requires 3 years but PSLF disputes can arise at forgiveness time — keep everything from day one.'},
+  {id:24, section:'07 — Ongoing record-keeping', urgency:'ongoing', order:24,
+   text:'If servicer changes from EdFinancial, re-verify payment count within 30 days',
+   note:'Account transfers are a common source of data errors. Do not assume the qualifying payment count transferred correctly — verify immediately with the new servicer.'},
+  {id:25, section:'07 — Ongoing record-keeping', urgency:'annual', order:25,
+   text:'Monitor PSLF program status each year for legislative or regulatory changes',
+   note:'Enrolled borrowers have been grandfathered in every reform attempt. But stay informed — set a calendar reminder to check program status each January.'},
+];
+
+const URGENCY_ORDER = {asap:0, soon:1, annual:2, ongoing:3};
+const URGENCY_LABEL = {asap:'ASAP', soon:'Soon', annual:'Annual', ongoing:'Ongoing'};
+const URGENCY_CLASS = {asap:'tag-asap', soon:'tag-soon', annual:'tag-annual', ongoing:'tag-ongoing'};
+
+let checked = new Set();
+let currentFilter = 'all';
+let currentSort = 'section';
+
+function render() {
+  let items = [...ITEMS];
+
+  if (currentSort === 'urgency') {
+    items.sort((a,b) => URGENCY_ORDER[a.urgency] - URGENCY_ORDER[b.urgency] || a.order - b.order);
+  } else if (currentSort === 'status') {
+    items.sort((a,b) => {
+      const ac = checked.has(a.id) ? 1 : 0;
+      const bc = checked.has(b.id) ? 1 : 0;
+      return ac - bc || a.order - b.order;
+    });
+  } else {
+    items.sort((a,b) => a.order - b.order);
+  }
+
+  const filtered = items.filter(i => currentFilter === 'all' || i.urgency === currentFilter);
+  const wrap = document.getElementById('items-wrap');
+  wrap.innerHTML = '';
+
+  let currentSection = null;
+  let sectionItems = {};
+
+  if (currentSort === 'section') {
+    items.forEach(i => {
+      if (!sectionItems[i.section]) sectionItems[i.section] = [];
+      sectionItems[i.section].push(i);
+    });
+  }
+
+  if (filtered.length === 0) {
+    document.getElementById('no-results').style.display = '';
+  } else {
+    document.getElementById('no-results').style.display = 'none';
+    let lastSection = null;
+
+    filtered.forEach((item, idx) => {
+      if (currentSort === 'section' && item.section !== lastSection) {
+        if (lastSection !== null) {
+          const div = document.createElement('div');
+          div.className = 'divider';
+          wrap.appendChild(div);
+        }
+        const sec = sectionItems[item.section] || [];
+        const doneCount = sec.filter(i => checked.has(i.id)).length;
+        const hdr = document.createElement('div');
+        hdr.className = 'section-header';
+        const numStr = item.section.split(' — ')[0];
+        const titleStr = item.section.split(' — ')[1] || '';
+        const countClass = doneCount === sec.length ? 'section-count done' : 'section-count';
+        hdr.innerHTML = `<span class="section-num">${numStr}</span><span class="section-title">${titleStr}</span><span class="${countClass}" id="sc-${item.section.replace(/\W/g,'')}">${doneCount} / ${sec.length}</span>`;
+        wrap.appendChild(hdr);
+        lastSection = item.section;
+      }
+
+      const el = document.createElement('div');
+      el.className = 'item' + (checked.has(item.id) ? ' checked' : '');
+      el.dataset.id = item.id;
+      el.dataset.urgency = item.urgency;
+      el.onclick = () => toggleItem(item.id);
+      el.innerHTML = `
+        <div class="checkbox"><div class="checkmark"></div></div>
+        <div class="item-body">
+          <div class="item-top">
+            <span class="item-text">${item.text}</span>
+            <span class="urgency-tag ${URGENCY_CLASS[item.urgency]}">${URGENCY_LABEL[item.urgency]}</span>
+          </div>
+          <div class="item-note">${item.note}</div>
+        </div>
+      `;
+      wrap.appendChild(el);
+    });
+  }
+
+  updateProgress();
+}
+
+function toggleItem(id) {
+  if (checked.has(id)) checked.delete(id);
+  else checked.add(id);
+  render();
+}
+
+function updateProgress() {
+  const total = ITEMS.length;
+  const done = checked.size;
+  const pct = total ? Math.round(done/total*100) : 0;
+  document.getElementById('prog-bar').style.width = pct + '%';
+  document.getElementById('prog-text').textContent = done + ' / ' + total;
+}
+
+function setFilter(f, btn) {
+  currentFilter = f;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  render();
+}
+
+function setSort(s, btn) {
+  currentSort = s;
+  document.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  render();
+}
+
+function resetAll() {
+  checked.clear();
+  render();
+}
+
+render();
+
+(function() {
+  var saved = localStorage.getItem('yoyo-theme') || 'dark';
+  document.documentElement.setAttribute('data-theme', saved);
+  window.addEventListener('DOMContentLoaded', function() {
+    var btn = document.getElementById('theme-btn');
+    if (btn) btn.textContent = saved === 'light' ? 'dark mode' : 'light mode';
+  });
+})();
+
+</script>
+</body>
+</html>

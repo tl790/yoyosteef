@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>YoYo — Etch Financial Meeting Notes</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #0f0f0f; --surface: #181818; --surface2: #1e1e1e; --border: #2a2a2a; --border2: #333;
+  --text: #f0ede8; --muted: #888; --dim: #444;
+  --green: #4ade80; --green-dim: rgba(74,222,128,0.07); --green-border: rgba(74,222,128,0.2);
+  --amber: #fbbf24; --amber-dim: rgba(251,191,36,0.07); --amber-border: rgba(251,191,36,0.2);
+  --red: #f87171; --red-dim: rgba(248,113,113,0.07); --red-border: rgba(248,113,113,0.2);
+  --purple: #a78bfa; --blue: #60a5fa;
+  --mono: 'DM Mono', monospace; --sans: 'DM Sans', sans-serif;
+}
+[data-theme="light"] {
+  --bg: #f8f7f4; --surface: #ffffff; --surface2: #f0eeea; --border: #e2ddd6; --border2: #ccc8c0;
+  --text: #1a1917; --muted: #6b6760; --dim: #a09d98;
+  --green-dim: rgba(22,163,74,0.08); --green-border: rgba(22,163,74,0.25);
+  --amber-dim: rgba(146,64,14,0.08); --amber-border: rgba(146,64,14,0.2);
+  --red-dim: rgba(185,28,28,0.08); --red-border: rgba(185,28,28,0.2);
+}
+[data-theme="light"] textarea { background: var(--surface2); border-color: var(--border2); color: var(--text); }
+[data-theme="light"] .q-block { background: var(--surface); border-color: var(--border); }
+[data-theme="light"] select { background: var(--surface2); }
+[data-theme="light"] .action-input { background: var(--surface2); border-color: var(--border2); color: var(--text); }
+body { background: var(--bg); color: var(--text); font-family: var(--sans); font-size: 14px; line-height: 1.5; transition: background .2s, color .2s; }
+
+.site-nav { border-bottom: 1px solid var(--border); padding: 0 28px; display: flex; align-items: center; gap: 2px; background: var(--bg); }
+.site-nav a { font-family: var(--mono); font-size: 11px; color: var(--dim); text-decoration: none; padding: 9px 14px; border-bottom: 2px solid transparent; transition: color .15s, border-color .15s; letter-spacing: .04em; }
+.site-nav a:hover { color: var(--muted); }
+.site-nav a.active { color: var(--text); border-bottom-color: var(--green); }
+
+header { border-bottom: 1px solid var(--border); padding: 18px 32px; display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; }
+header h1 { font-family: var(--mono); font-size: 12px; font-weight: 400; color: var(--muted); letter-spacing: .08em; text-transform: uppercase; }
+header .name { font-family: var(--mono); font-size: 12px; color: var(--purple); }
+header .meta { font-family: var(--mono); font-size: 11px; color: var(--dim); }
+.header-btns { margin-left: auto; display: flex; gap: 8px; align-items: center; }
+.hbtn { font-family: var(--mono); font-size: 10px; padding: 4px 12px; border-radius: 3px; border: 1px solid var(--border2); background: transparent; color: var(--muted); cursor: pointer; transition: all .15s; letter-spacing: .04em; }
+.hbtn:hover { color: var(--text); border-color: var(--muted); }
+.hbtn.save { color: var(--green); border-color: rgba(74,222,128,0.3); }
+.hbtn.save:hover { background: var(--green-dim); }
+
+.toolbar { border-bottom: 1px solid var(--border); padding: 10px 32px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.tl { font-family: var(--mono); font-size: 10px; color: var(--dim); text-transform: uppercase; letter-spacing: .08em; margin-right: 4px; }
+.tb { font-family: var(--mono); font-size: 11px; padding: 4px 12px; border-radius: 3px; border: 1px solid var(--border2); background: transparent; color: var(--muted); cursor: pointer; transition: all .15s; }
+.tb:hover { color: var(--text); }
+.tb.active { color: var(--text); background: var(--surface2); border-color: var(--border2); }
+
+.container { max-width: 860px; margin: 0 auto; padding: 28px 32px 60px; }
+
+.meta-strip { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 10px; margin-bottom: 24px; }
+.meta-field { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 10px 14px; }
+.mf-label { font-family: var(--mono); font-size: 10px; color: var(--dim); text-transform: uppercase; letter-spacing: .07em; margin-bottom: 4px; }
+.mf-input { width: 100%; background: transparent; border: none; color: var(--text); font-family: var(--sans); font-size: 13px; outline: none; }
+.mf-input::placeholder { color: var(--dim); }
+
+.section-title { font-family: var(--mono); font-size: 10px; color: var(--dim); text-transform: uppercase; letter-spacing: .1em; margin: 24px 0 10px; }
+
+.q-block { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; margin-bottom: 10px; overflow: hidden; transition: border-color .2s; }
+.q-block:focus-within { border-color: var(--border2); }
+.q-block.answered { border-color: rgba(74,222,128,0.2); }
+.q-header { display: flex; align-items: flex-start; gap: 12px; padding: 14px 16px 10px; }
+.q-num { font-family: var(--mono); font-size: 11px; color: var(--dim); min-width: 22px; margin-top: 1px; flex-shrink: 0; }
+.q-text { font-size: 13px; font-weight: 500; color: var(--text); line-height: 1.5; flex: 1; }
+.q-badge { font-family: var(--mono); font-size: 9px; padding: 2px 8px; border-radius: 3px; border: 1px solid; flex-shrink: 0; margin-top: 2px; white-space: nowrap; }
+.badge-critical { background: var(--red-dim); color: var(--red); border-color: var(--red-border); }
+.badge-important { background: var(--amber-dim); color: var(--amber); border-color: var(--amber-border); }
+.badge-confirm { background: var(--green-dim); color: var(--green); border-color: var(--green-border); }
+.q-context { font-size: 12px; color: var(--muted); line-height: 1.6; padding: 0 16px 0 50px; margin-bottom: 8px; }
+.answer-wrap { padding: 0 16px 14px 50px; }
+.answer-label { font-family: var(--mono); font-size: 10px; color: var(--dim); text-transform: uppercase; letter-spacing: .07em; margin-bottom: 6px; display: flex; align-items: center; gap: 8px; }
+.answer-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--dim); flex-shrink: 0; transition: background .2s; }
+.q-block.answered .answer-dot { background: var(--green); }
+textarea { width: 100%; background: var(--surface2); border: 1px solid var(--border2); border-radius: 5px; color: var(--text); font-family: var(--sans); font-size: 13px; line-height: 1.6; padding: 10px 12px; resize: vertical; min-height: 72px; outline: none; transition: border-color .2s; }
+textarea:focus { border-color: var(--dim); }
+textarea::placeholder { color: var(--dim); }
+.action-wrap { padding: 0 16px 12px 50px; }
+.action-row { display: flex; gap: 10px; align-items: center; }
+.action-label { font-family: var(--mono); font-size: 10px; color: var(--dim); text-transform: uppercase; letter-spacing: .07em; min-width: 70px; }
+.action-input { flex: 1; background: var(--surface2); border: 1px solid var(--border2); border-radius: 4px; color: var(--text); font-family: var(--sans); font-size: 12px; padding: 6px 10px; outline: none; }
+.action-input::placeholder { color: var(--dim); }
+.action-input:focus { border-color: var(--dim); }
+.open-notes { margin-top: 10px; }
+.open-notes textarea { min-height: 120px; }
+
+/* Print styles */
+@media print {
+  .site-nav, .toolbar, .header-btns, #print-timestamp { display: none; }
+  body { background: white; color: #111; }
+  header { border-color: #ddd; }
+  .q-block { border-color: #ddd !important; background: white; page-break-inside: avoid; box-shadow: none; }
+  textarea, .action-input { border-color: #ddd; background: white; color: #333; }
+  .mf-input { color: #333; }
+  .meta-field { border-color: #ddd; background: white; }
+  #print-timestamp-visible { display: block !important; }
+}
+#print-timestamp-visible { display: none; font-family: monospace; font-size: 11px; color: #888; margin-bottom: 12px; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Meeting Notes —</h1>
+  <span class="name">Etch Financial · YoYo</span>
+  <span class="meta" id="date-display"></span>
+  <div class="header-btns">
+    <button class="hbtn save" onclick="savePDF()">Save as PDF</button>
+    <button class="hbtn" id="theme-btn" onclick="toggleTheme()">light mode</button>
+  </div>
+</header>
+
+<nav class="site-nav">
+  <a href="https://tl790.github.io/yoyosteef/yoyo_financial_model.html">Financial model</a>
+  <a href="https://tl790.github.io/yoyosteef/yoyo_pslf_checklist.html">PSLF checklist</a>
+  <a href="https://tl790.github.io/yoyosteef/yoyo_meeting_notes.html" class="active">Meeting notes</a>
+</nav>
+
+<div class="toolbar">
+  <span class="tl">View:</span>
+  <button class="tb active" onclick="filterView('all',this)">All questions</button>
+  <button class="tb" onclick="filterView('unanswered',this)">Unanswered</button>
+  <button class="tb" onclick="filterView('answered',this)">Answered</button>
+</div>
+
+<div class="container">
+  <div id="print-timestamp-visible"></div>
+
+  <div class="meta-strip">
+    <div class="meta-field"><div class="mf-label">Meeting date</div><input class="mf-input" id="mtg-date" type="text" placeholder="e.g. May 2, 2026" oninput="autosave()"></div>
+    <div class="meta-field"><div class="mf-label">Advisor name</div><input class="mf-input" id="mtg-advisor" type="text" placeholder="Etch Financial rep" oninput="autosave()"></div>
+    <div class="meta-field"><div class="mf-label">Format</div><input class="mf-input" id="mtg-format" type="text" placeholder="Zoom / In-person / Phone" oninput="autosave()"></div>
+    <div class="meta-field"><div class="mf-label">Follow-up deadline</div><input class="mf-input" id="mtg-followup" type="text" placeholder="e.g. 1 week after" oninput="autosave()"></div>
+  </div>
+
+  <div class="section-title">Critical gate — confirm before anything else</div>
+  <div id="q-critical"></div>
+  <div class="section-title">PSLF enrollment setup</div>
+  <div id="q-enrollment"></div>
+  <div class="section-title">Repayment mechanics</div>
+  <div id="q-repayment"></div>
+  <div class="section-title">Income + private practice</div>
+  <div id="q-income"></div>
+  <div class="section-title">Perkins loans (separate track)</div>
+  <div id="q-perkins"></div>
+  <div class="section-title">Meta / advisor qualification</div>
+  <div id="q-meta"></div>
+  <div class="section-title">Open notes</div>
+  <div class="open-notes">
+    <textarea id="open-notes" placeholder="Additional notes, action items, or anything that comes up in the meeting not covered above..." oninput="autosave()"></textarea>
+  </div>
+</div>
+
+<script>
+const QUESTIONS = [
+  {id:'q1',section:'q-critical',badge:'critical',badgeLabel:'Critical gate',
+   text:'Does my current schedule at Tufts (2–3 days/week) qualify for PSLF under the full-time requirement?',
+   context:'PSLF requires "full-time employment" — 30+ hours/week OR the employer\'s own definition. This is the most critical question. If no or uncertain, the entire PSLF strategy may not work.'},
+  {id:'q2',section:'q-critical',badge:'critical',badgeLabel:'Critical gate',
+   text:'Can you confirm Tufts University Health Sciences is my qualifying employer of record — not a staffing entity or sub-organization?',
+   context:'The employer signing the ECF must be a direct 501(c)(3). If her W-2 is from a subsidiary or contractor arrangement rather than Tufts itself, this breaks eligibility.'},
+  {id:'q3',section:'q-enrollment',badge:'important',badgeLabel:'Important',
+   text:'I have 0 PSLF-matched months despite working at Tufts for ~2 years. Is there any pathway to recover those months retroactively?',
+   context:'The IDR Account Adjustment waiver expired 2023, Limited WAIVER expired 2022. Checking if any current program could credit prior months.'},
+  {id:'q4',section:'q-enrollment',badge:'important',badgeLabel:'Important',
+   text:'Which IDR plan do you recommend right now — IBR or SAVE — given the SAVE litigation?',
+   context:'SAVE is currently under legal challenge. Need to confirm the safest qualifying plan given the current legal environment.'},
+  {id:'q5',section:'q-enrollment',badge:'confirm',badgeLabel:'Confirm',
+   text:'If SAVE is struck down mid-enrollment, do my prior qualifying payments on SAVE still count toward PSLF?',
+   context:'Need to understand the backstop — if SAVE is eliminated, does she revert to IBR and keep her payment count?'},
+  {id:'q6',section:'q-enrollment',badge:'confirm',badgeLabel:'Confirm',
+   text:'Walk me through submitting the Employment Certification Form — what do I need from Tufts HR and how long does approval take?',
+   context:'Want to understand the mechanics, timeline, and common errors to avoid at first submission.'},
+  {id:'q7',section:'q-repayment',badge:'confirm',badgeLabel:'Confirm',
+   text:'My IBR payment is very low (~$119/mo at current income). Does that count as a qualifying payment even though it barely covers interest?',
+   context:'Confirm that low IBR payments qualify even when the balance is growing, and that this is fine under PSLF since balance is forgiven anyway.'},
+  {id:'q8',section:'q-repayment',badge:'confirm',badgeLabel:'Confirm',
+   text:'I had multiple forbearance periods between 2021 and 2026. Do any count, and should I avoid forbearance going forward?',
+   context:'NSLDS data shows repeated forbearance stints. Need to understand impact and whether any could ever be credited.'},
+  {id:'q9',section:'q-repayment',badge:'important',badgeLabel:'Important',
+   text:'How does annual income recertification work, and what happens if I miss the deadline?',
+   context:'Income varies year to year between Tufts and private practice. Need to understand the process, timing, and consequences.'},
+  {id:'q10',section:'q-income',badge:'confirm',badgeLabel:'Confirm',
+   text:'I also work 2–3 days/week at two private dental practices. Does this affect my PSLF eligibility?',
+   context:'Confirm private practice moonlighting does not disqualify her from PSLF as long as Tufts remains the primary qualifying employer.'},
+  {id:'q11',section:'q-income',badge:'important',badgeLabel:'Important',
+   text:'How does combined income from Tufts (~$80K) and private practice (~$150K) affect my IBR payment calculation?',
+   context:'IBR is based on AGI. Need to understand whether both income sources are counted and whether filing strategy affects calculation.'},
+  {id:'q12',section:'q-income',badge:'confirm',badgeLabel:'Confirm',
+   text:'If I significantly increase private practice income in future years, does that change the PSLF strategy?',
+   context:'Higher income = higher IBR payment = more paid before forgiveness, but PSLF is still tax-free. Confirm math and whether any income level makes PSLF suboptimal.'},
+  {id:'q13',section:'q-perkins',badge:'important',badgeLabel:'Important',
+   text:'I have two Federal Perkins loans ($11,727 total) held by UCSF — not EdFinancial. Can you help initiate Perkins Loan Cancellation for dental faculty?',
+   context:'Perkins loans not eligible for PSLF or IBR. Eligible for Perkins Cancellation: 15%/yr years 1–2, 20%/yr years 3–4, 30% year 5. May already have 2 years qualifying.'},
+  {id:'q14',section:'q-perkins',badge:'confirm',badgeLabel:'Confirm',
+   text:'Do I apply for Perkins cancellation directly to UCSF, and do I need to do this annually?',
+   context:'Who handles it, the process, and whether there is a time limit on applying retroactively for prior years.'},
+  {id:'q15',section:'q-meta',badge:'important',badgeLabel:'Important',
+   text:'How are you compensated for this service — and is there anything you can help me do that I couldn\'t do at studentaid.gov for free?',
+   context:'Understanding the advisor\'s fee structure and value-add.'},
+  {id:'q16',section:'q-meta',badge:'confirm',badgeLabel:'Confirm',
+   text:'What should I do if my servicer (EdFinancial) transfers my loans to a different servicer mid-program?',
+   context:'Servicer changes are a known risk point for PSLF payment count errors.'},
+];
+
+const BADGE_CLASS = {critical:'badge-critical',important:'badge-important',confirm:'badge-confirm'};
+const STORAGE_KEY = 'yoyo-meeting-notes';
+
+function buildQuestions() {
+  QUESTIONS.forEach((q, idx) => {
+    const wrap = document.getElementById(q.section);
+    if (!wrap) return;
+    const el = document.createElement('div');
+    el.className = 'q-block';
+    el.id = 'block-' + q.id;
+    el.innerHTML = `
+      <div class="q-header">
+        <span class="q-num">${String(idx+1).padStart(2,'0')}</span>
+        <span class="q-text">${q.text}</span>
+        <span class="q-badge ${BADGE_CLASS[q.badge]}">${q.badgeLabel}</span>
+      </div>
+      <div class="q-context">${q.context}</div>
+      <div class="action-wrap">
+        <div class="action-row">
+          <span class="action-label">Their answer</span>
+          <input class="action-input" id="ans-short-${q.id}" type="text" placeholder="One-line answer or verdict..." oninput="checkAnswered('${q.id}'); autosave()">
+        </div>
+      </div>
+      <div class="answer-wrap">
+        <div class="answer-label"><span class="answer-dot" id="dot-${q.id}"></span>Detailed notes</div>
+        <textarea id="ans-${q.id}" placeholder="Notes, caveats, anything they say worth capturing..." oninput="checkAnswered('${q.id}'); autosave()"></textarea>
+      </div>
+    `;
+    wrap.appendChild(el);
+  });
+}
+
+function checkAnswered(id) {
+  const shortVal = (document.getElementById('ans-short-'+id)||{}).value || '';
+  const longVal = (document.getElementById('ans-'+id)||{}).value || '';
+  const hasContent = shortVal.trim().length > 0 || longVal.trim().length > 0;
+  const blockEl = document.getElementById('block-'+id);
+  if (blockEl) blockEl.classList.toggle('answered', hasContent);
+  const dot = document.getElementById('dot-'+id);
+  if (dot) dot.style.background = hasContent ? 'var(--green)' : 'var(--dim)';
+}
+
+function filterView(f, btn) {
+  document.querySelectorAll('.tb').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.q-block').forEach(el => {
+    const answered = el.classList.contains('answered');
+    el.style.display = f === 'all' ? '' : f === 'answered' ? (answered ? '' : 'none') : (!answered ? '' : 'none');
+  });
+}
+
+function autosave() {
+  const data = {
+    meta: {
+      date: document.getElementById('mtg-date').value,
+      advisor: document.getElementById('mtg-advisor').value,
+      format: document.getElementById('mtg-format').value,
+      followup: document.getElementById('mtg-followup').value,
+    },
+    answers: {},
+    openNotes: document.getElementById('open-notes').value,
+    savedAt: new Date().toISOString(),
+  };
+  QUESTIONS.forEach(q => {
+    data.answers[q.id] = {
+      short: (document.getElementById('ans-short-'+q.id)||{}).value || '',
+      long: (document.getElementById('ans-'+q.id)||{}).value || '',
+    };
+  });
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); } catch(e) {}
+}
+
+function loadSaved() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return;
+    const data = JSON.parse(raw);
+    if (data.meta) {
+      document.getElementById('mtg-date').value = data.meta.date || '';
+      document.getElementById('mtg-advisor').value = data.meta.advisor || '';
+      document.getElementById('mtg-format').value = data.meta.format || '';
+      document.getElementById('mtg-followup').value = data.meta.followup || '';
+    }
+    if (data.answers) {
+      QUESTIONS.forEach(q => {
+        const ans = data.answers[q.id];
+        if (!ans) return;
+        const shortEl = document.getElementById('ans-short-'+q.id);
+        const longEl = document.getElementById('ans-'+q.id);
+        if (shortEl) shortEl.value = ans.short || '';
+        if (longEl) longEl.value = ans.long || '';
+        checkAnswered(q.id);
+      });
+    }
+    if (data.openNotes) document.getElementById('open-notes').value = data.openNotes;
+  } catch(e) {}
+}
+
+function savePDF() {
+  const now = new Date();
+  const stamp = now.toLocaleDateString('en-US', {weekday:'long',year:'numeric',month:'long',day:'numeric'})
+    + ' at ' + now.toLocaleTimeString('en-US', {hour:'numeric',minute:'2-digit',hour12:true});
+  const el = document.getElementById('print-timestamp-visible');
+  el.textContent = 'Printed: ' + stamp;
+  el.style.display = 'block';
+  setTimeout(() => {
+    window.print();
+    setTimeout(() => { el.style.display = 'none'; }, 1000);
+  }, 100);
+}
+
+function toggleTheme() {
+  const html = document.documentElement;
+  const next = html.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+  html.setAttribute('data-theme', next);
+  document.getElementById('theme-btn').textContent = next === 'light' ? 'dark mode' : 'light mode';
+  localStorage.setItem('yoyo-theme', next);
+}
+
+(function() {
+  const saved = localStorage.getItem('yoyo-theme') || 'dark';
+  document.documentElement.setAttribute('data-theme', saved);
+  window.addEventListener('DOMContentLoaded', function() {
+    var btn = document.getElementById('theme-btn');
+    if (btn) btn.textContent = saved === 'light' ? 'dark mode' : 'light mode';
+    document.getElementById('date-display').textContent = new Date().toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'});
+    buildQuestions();
+    loadSaved();
+  });
+})();
+</script>
+</body>
+</html>

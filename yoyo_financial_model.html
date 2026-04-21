@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>YoYo — Student Loan Financial Model</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #0f0f0f; --surface: #181818; --surface2: #222; --border: #2a2a2a; --border2: #333;
+  --text: #f0ede8; --muted: #888; --dim: #555;
+  --green: #4ade80; --green-dim: rgba(74,222,128,0.1); --green-border: rgba(74,222,128,0.25);
+  --orange: #fb923c; --orange-dim: rgba(251,146,60,0.1);
+  --accent: #a78bfa; --danger: #f87171; --blue: #60a5fa;
+  --mono: 'DM Mono', monospace; --sans: 'DM Sans', sans-serif;
+}
+[data-theme="light"] {
+  --bg: #f8f7f4; --surface: #ffffff; --surface2: #f0eeea; --border: #e2ddd6; --border2: #ccc8c0;
+  --text: #1a1917; --muted: #6b6760; --dim: #a09d98;
+  --green-dim: rgba(22,163,74,0.08); --green-border: rgba(22,163,74,0.25);
+  --orange-dim: rgba(194,65,12,0.08);
+  --red-dim: rgba(185,28,28,0.08); --red-border: rgba(185,28,28,0.2);
+}
+[data-theme="light"] input[type=range] { background: var(--border2); }
+[data-theme="light"] input[type=range]::-webkit-slider-thumb { background: var(--text); }
+[data-theme="light"] select { background: var(--surface2); }
+[data-theme="light"] .schedule-table th { background: var(--surface2); }
+body { background: var(--bg); color: var(--text); font-family: var(--sans); transition: background .2s, color .2s; font-size: 14px; line-height: 1.5; transition: background .2s, color .2s; }
+header { border-bottom: 1px solid var(--border); padding: 18px 28px; display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; }
+header h1 { font-family: var(--mono); font-size: 12px; font-weight: 400; color: var(--muted); letter-spacing: .08em; text-transform: uppercase; }
+header .name { font-family: var(--mono); font-size: 12px; color: var(--accent); }
+header .badge { margin-left: auto; font-family: var(--mono); font-size: 10px; color: var(--green); background: var(--green-dim); border: 1px solid var(--green-border); padding: 3px 10px; border-radius: 3px; }
+.layout { display: grid; grid-template-columns: 310px 1fr; min-height: calc(100vh - 53px); }
+.sidebar { border-right: 1px solid var(--border); padding: 20px 18px; display: flex; flex-direction: column; gap: 18px; overflow-y: auto; }
+.main { padding: 22px 26px; display: flex; flex-direction: column; gap: 16px; overflow-y: auto; }
+
+/* controls */
+.ctrl-label { font-family: var(--mono); font-size: 10px; color: var(--dim); text-transform: uppercase; letter-spacing: .1em; margin-bottom: 8px; }
+.ctrl-note { font-size: 11px; color: var(--dim); margin-bottom: 10px; line-height: 1.5; }
+.ctrl-row { display: flex; flex-direction: column; gap: 6px; margin-bottom: 10px; }
+.ctrl-top { display: flex; justify-content: space-between; align-items: baseline; }
+.ctrl-top label { font-size: 12px; color: var(--muted); }
+.ctrl-top .val { font-family: var(--mono); font-size: 13px; font-weight: 500; color: var(--text); }
+input[type=range] { -webkit-appearance: none; width: 100%; height: 3px; background: var(--border2); border-radius: 2px; outline: none; cursor: pointer; }
+input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 13px; height: 13px; border-radius: 50%; background: var(--text); cursor: pointer; transition: transform .1s; }
+input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.2); }
+select { width: 100%; background: var(--surface2); color: var(--text); border: 1px solid var(--border2); border-radius: 4px; padding: 8px 10px; font-size: 12px; font-family: var(--sans); cursor: pointer; outline: none; }
+
+/* exact income inputs */
+.year-group { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 12px 14px; margin-bottom: 8px; }
+.year-group-title { font-family: var(--mono); font-size: 10px; color: var(--accent); text-transform: uppercase; letter-spacing: .08em; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
+.year-group-title .ibr-calc { font-size: 10px; color: var(--green); }
+.income-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.income-row:last-child { margin-bottom: 0; }
+.income-row label { font-size: 11px; color: var(--muted); min-width: 72px; }
+.income-input-wrap { display: flex; align-items: center; gap: 4px; flex: 1; background: var(--surface2); border: 1px solid var(--border2); border-radius: 4px; padding: 0 8px; }
+.income-input-wrap span { font-family: var(--mono); font-size: 12px; color: var(--dim); }
+.income-input { background: transparent; border: none; color: var(--text); font-family: var(--mono); font-size: 12px; width: 100%; padding: 6px 0; outline: none; }
+.income-input::placeholder { color: var(--dim); }
+
+.future-row { display: flex; flex-direction: column; gap: 6px; margin-bottom: 0; }
+.future-slider-row { display: flex; align-items: center; gap: 8px; }
+.future-slider-row label { font-size: 11px; color: var(--muted); min-width: 72px; }
+.future-slider-row input[type=range] { flex: 1; }
+.future-slider-row .fval { font-family: var(--mono); font-size: 12px; color: var(--text); min-width: 48px; text-align: right; }
+
+.divider { height: 1px; background: var(--border); flex-shrink: 0; }
+
+/* payment spotlight */
+.payment-spotlight { background: var(--surface); border: 1px solid var(--green-border); border-radius: 8px; padding: 14px 16px; }
+.ps-label { font-family: var(--mono); font-size: 10px; color: var(--green); text-transform: uppercase; letter-spacing: .1em; margin-bottom: 2px; }
+.ps-sub-label { font-size: 11px; color: var(--dim); margin-bottom: 6px; }
+.ps-amount { font-family: var(--mono); font-size: 28px; font-weight: 500; color: var(--green); line-height: 1.1; }
+.ps-breakdown { display: flex; flex-direction: column; gap: 4px; margin-top: 10px; border-top: 1px solid var(--border); padding-top: 8px; }
+.ps-row { display: flex; justify-content: space-between; font-size: 11px; }
+.psl { color: var(--dim); }
+.psv { font-family: var(--mono); color: var(--muted); }
+.psv.hi { color: var(--text); }
+.psv.green { color: var(--green); }
+.psv.orange { color: var(--orange); }
+.psv.red { color: var(--danger); }
+
+/* loan summary */
+.loan-summary { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 12px 14px; }
+.lr { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid var(--border); font-size: 12px; }
+.lr:last-child { border-bottom: none; }
+.lr .ll { color: var(--muted); }
+.lr .lv { font-family: var(--mono); color: var(--text); }
+.lr .lv.big { font-size: 14px; font-weight: 500; }
+.lr .lv.red { color: var(--danger); }
+
+.stat-block { display: flex; flex-direction: column; gap: 8px; }
+.stat-row { display: flex; justify-content: space-between; align-items: baseline; }
+.stat-row .sl { font-size: 12px; color: var(--muted); }
+.stat-row .sv { font-family: var(--mono); font-size: 12px; color: var(--text); }
+.stat-row .sv.green { color: var(--green); }
+.stat-row .sv.orange { color: var(--orange); }
+.stat-row .sv.red { color: var(--danger); }
+.stat-row .sv.purple { color: var(--accent); }
+
+/* main area */
+.verdict-box { border-radius: 6px; padding: 12px 16px; font-size: 13px; line-height: 1.6; border: 1px solid; }
+.verdict-box.pslf-wins { background: var(--green-dim); border-color: var(--green-border); color: #86efac; }
+.verdict-box.alt-path { background: var(--orange-dim); border-color: rgba(251,146,60,0.3); color: #fdba74; }
+.metrics-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.metric-card { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 12px 14px; }
+.mc-label { font-family: var(--mono); font-size: 10px; color: var(--dim); text-transform: uppercase; letter-spacing: .08em; margin-bottom: 5px; }
+.mc-val { font-family: var(--mono); font-size: 18px; font-weight: 500; color: var(--text); }
+.mc-val.green { color: var(--green); }
+.mc-val.orange { color: var(--orange); }
+.mc-val.purple { color: var(--accent); }
+.mc-val.red { color: var(--danger); }
+.mc-sub { font-size: 11px; color: var(--dim); margin-top: 2px; }
+.mc-sub.green { color: rgba(74,222,128,.7); }
+.mc-sub.red { color: #fca5a5; }
+.mc-sub.warn { color: #fde68a; }
+
+/* payment schedule table */
+.schedule-section { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; overflow: hidden; }
+.schedule-header { padding: 12px 16px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px; }
+.schedule-title { font-family: var(--mono); font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; }
+.schedule-note { font-size: 11px; color: var(--dim); }
+.schedule-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.schedule-table th { font-family: var(--mono); font-size: 10px; color: var(--dim); text-transform: uppercase; letter-spacing: .06em; padding: 8px 14px; text-align: left; border-bottom: 1px solid var(--border); background: var(--surface2); font-weight: 400; }
+.schedule-table td { padding: 8px 14px; border-bottom: 1px solid var(--border); color: var(--muted); font-family: var(--mono); font-size: 12px; }
+.schedule-table tr:last-child td { border-bottom: none; }
+.schedule-table tr.cur-year td { color: var(--text); }
+.schedule-table .td-year { color: var(--text); font-weight: 500; }
+.schedule-table .td-income { color: var(--accent); }
+.schedule-table .td-pmt { color: var(--green); }
+.schedule-table .td-interest { color: var(--orange); }
+.schedule-table .td-balance { color: var(--text); }
+.schedule-table .td-grows { font-size: 10px; color: var(--dim); }
+
+.chart-section { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 16px 16px 12px; }
+.chart-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+.chart-title { font-family: var(--mono); font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; }
+.legend { display: flex; gap: 14px; }
+.li { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--muted); }
+.ll-s { width: 16px; height: 2px; border-radius: 1px; }
+.ll-dash { width: 16px; height: 0; border-top: 2px dashed var(--orange); }
+.note-box { background: var(--surface); border: 1px solid var(--border); border-left: 3px solid var(--dim); border-radius: 0 6px 6px 0; padding: 12px 16px; font-size: 12px; color: var(--muted); line-height: 1.7; }
+
+.site-nav { border-bottom: 1px solid var(--border); padding: 0 28px; display: flex; align-items: center; gap: 2px; background: var(--bg); }
+.site-nav a { font-family: var(--mono); font-size: 11px; color: var(--dim); text-decoration: none; padding: 9px 14px; border-bottom: 2px solid transparent; transition: color .15s, border-color .15s; letter-spacing: .04em; }
+.site-nav a:hover { color: var(--muted); }
+.site-nav a.active { color: var(--text); border-bottom-color: var(--green); }
+</style>
+</head>
+<body>
+<header>
+  <h1>Student Loan Model —</h1>
+  <span class="name">YoYo</span>
+  <span class="badge">PSLF analysis · Apr 2026</span>
+  <button id="theme-btn" onclick="toggleTheme()" style="margin-left:8px;font-family:var(--mono);font-size:10px;padding:3px 10px;border-radius:3px;border:1px solid var(--border2);background:transparent;color:var(--muted);cursor:pointer;letter-spacing:.05em">light mode</button>
+</header>
+<nav class="site-nav">
+  <a href="https://tl790.github.io/yoyosteef/yoyo_financial_model.html" class="active">Financial model</a>
+  <a href="https://tl790.github.io/yoyosteef/yoyo_pslf_checklist.html">PSLF checklist</a>
+  <a href="https://tl790.github.io/yoyosteef/yoyo_meeting_notes.html">Meeting notes</a>
+</nav>
+
+<div class="layout">
+  <div class="sidebar">
+
+    <div class="loan-summary">
+      <div class="lr"><span class="ll">Total balance</span><span class="lv big">$721,333</span></div>
+      <div class="lr"><span class="ll">Principal</span><span class="lv">$596,175</span></div>
+      <div class="lr"><span class="ll">Accrued interest</span><span class="lv">$125,158</span></div>
+      <div class="lr"><span class="ll">Blended rate</span><span class="lv">6.60%</span></div>
+      <div class="lr"><span class="ll">Monthly interest</span><span class="lv">~$3,967</span></div>
+      <div class="lr"><span class="ll">PSLF months</span><span class="lv red">0 / 120</span></div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div>
+      <div class="ctrl-label">Income by tax year</div>
+      <div class="ctrl-note">IBR is based on prior year AGI. 2025 tax return → drives 2026 payments. 2026 tax return → drives 2027 payments.</div>
+
+      <div class="year-group">
+        <div class="year-group-title">
+          <span>2025 tax year</span>
+          <span class="ibr-calc" id="ibr-2025-display">→ IBR: —</span>
+        </div>
+        <div class="income-row">
+          <label>Tufts</label>
+          <div class="income-input-wrap"><span>$</span><input class="income-input" id="inc-2025-tufts" type="number" min="0" max="500000" step="1000" placeholder="80,000" oninput="update()"></div>
+        </div>
+        <div class="income-row">
+          <label>Private</label>
+          <div class="income-input-wrap"><span>$</span><input class="income-input" id="inc-2025-priv" type="number" min="0" max="500000" step="1000" placeholder="150,000" oninput="update()"></div>
+        </div>
+      </div>
+
+      <div class="year-group">
+        <div class="year-group-title">
+          <span>2026 tax year</span>
+          <span class="ibr-calc" id="ibr-2026-display">→ IBR: —</span>
+        </div>
+        <div class="income-row">
+          <label>Tufts</label>
+          <div class="income-input-wrap"><span>$</span><input class="income-input" id="inc-2026-tufts" type="number" min="0" max="500000" step="1000" placeholder="80,000" oninput="update()"></div>
+        </div>
+        <div class="income-row">
+          <label>Private</label>
+          <div class="income-input-wrap"><span>$</span><input class="income-input" id="inc-2026-priv" type="number" min="0" max="500000" step="1000" placeholder="150,000" oninput="update()"></div>
+        </div>
+      </div>
+
+      <div class="year-group">
+        <div class="year-group-title">
+          <span>2027–2035 (future years)</span>
+          <span class="ibr-calc" id="ibr-future-display">→ IBR: —</span>
+        </div>
+        <div class="future-row">
+          <div class="future-slider-row">
+            <label>Tufts</label>
+            <input type="range" min="0" max="200" step="5" value="80" id="sl-fut-tufts" oninput="update()">
+            <span class="fval" id="out-fut-tufts">$80K</span>
+          </div>
+          <div class="future-slider-row">
+            <label>Private</label>
+            <input type="range" min="0" max="500" step="10" value="150" id="sl-fut-priv" oninput="update()">
+            <span class="fval" id="out-fut-priv">$150K</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div>
+      <div class="ctrl-label">Strategy</div>
+      <div class="ctrl-row" style="margin-bottom:0">
+        <select id="sl-strat" onchange="update()">
+          <option value="pslf">PSLF — forgiven Apr 2036</option>
+          <option value="ibr">IBR only — 25-yr forgiveness</option>
+          <option value="aggressive">Aggressive payoff</option>
+        </select>
+      </div>
+      <div class="ctrl-row" id="extra-row" style="display:none; margin-top:10px">
+        <div class="ctrl-top"><label>Extra monthly payment</label><span class="val" id="out-extra">$3,000</span></div>
+        <input type="range" min="0" max="12000" step="250" value="3000" id="sl-extra" oninput="update()">
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="payment-spotlight">
+      <div class="ps-label">2026 monthly payment</div>
+      <div class="ps-sub-label" id="ps-sublabel">Based on 2025 tax return</div>
+      <div class="ps-amount" id="ps-amount">—</div>
+      <div class="ps-breakdown" id="ps-breakdown"></div>
+    </div>
+
+    <div class="divider"></div>
+    <div class="stat-block" id="sidebar-stats"></div>
+
+  </div>
+
+  <div class="main">
+    <div id="verdict-box" class="verdict-box pslf-wins"></div>
+    <div class="metrics-grid" id="metrics"></div>
+
+    <div class="schedule-section">
+      <div class="schedule-header">
+        <span class="schedule-title">Payment schedule — year by year</span>
+        <span class="schedule-note">IBR recalculates annually from prior year AGI</span>
+      </div>
+      <table class="schedule-table">
+        <thead>
+          <tr>
+            <th>Year</th>
+            <th>AGI (prior yr)</th>
+            <th>IBR payment</th>
+            <th>Annual paid</th>
+            <th>Interest accrued</th>
+            <th>Balance (end of yr)</th>
+          </tr>
+        </thead>
+        <tbody id="schedule-body"></tbody>
+      </table>
+    </div>
+
+    <div class="chart-section">
+      <div class="chart-header">
+        <span class="chart-title">Loan balance over time</span>
+        <div class="legend">
+          <div class="li"><div class="ll-s" style="background:var(--green)"></div>PSLF</div>
+          <div class="li" id="leg1"><div class="ll-dash"></div>Alternative</div>
+        </div>
+      </div>
+      <div style="position:relative;height:200px">
+        <canvas id="chart1" role="img" aria-label="Loan balance over time">Balance comparison.</canvas>
+      </div>
+    </div>
+
+    <div class="chart-section">
+      <div class="chart-header">
+        <span class="chart-title">Cumulative cash paid</span>
+        <div class="legend">
+          <div class="li"><div class="ll-s" style="background:var(--green)"></div>PSLF</div>
+          <div class="li" id="leg2"><div class="ll-s" style="background:var(--orange)"></div>Alternative</div>
+        </div>
+      </div>
+      <div style="position:relative;height:180px">
+        <canvas id="chart2" role="img" aria-label="Cumulative cash paid">Cumulative payment comparison.</canvas>
+      </div>
+    </div>
+
+    <div class="note-box" id="note-box"></div>
+  </div>
+</div>
+
+<script>
+const BALANCE = 721333, RATE = 0.066, MR = RATE/12, POVERTY_K = 33.885, START = 2026;
+let c1, c2;
+
+function toggleTheme() {
+  const html = document.documentElement;
+  const isLight = html.getAttribute('data-theme') === 'light';
+  const next = isLight ? 'dark' : 'light';
+  html.setAttribute('data-theme', next);
+  document.getElementById('theme-btn').textContent = next === 'light' ? 'dark mode' : 'light mode';
+  localStorage.setItem('yoyo-theme', next);
+  setTimeout(update, 50);
+}
+(function() {
+  const saved = localStorage.getItem('yoyo-theme') || 'dark';
+  document.documentElement.setAttribute('data-theme', saved);
+  window.addEventListener('DOMContentLoaded', () => {
+    const btn = document.getElementById('theme-btn');
+    if (btn) btn.textContent = saved === 'light' ? 'dark mode' : 'light mode';
+  });
+})();
+
+function fmt(n) {
+  const a = Math.abs(n), s = n < 0 ? '-' : '';
+  if (a >= 1000000) return s+'$'+(a/1000000).toFixed(2).replace(/\.?0+$/,'')+'M';
+  if (a >= 1000) return s+'$'+Math.round(a/1000)+'K';
+  return s+'$'+Math.round(a).toLocaleString();
+}
+function fmtFull(n) { return '$'+Math.round(n).toLocaleString(); }
+
+// agi in full dollars
+function ibrFromDollars(agi) {
+  return Math.round(Math.max(0, agi - POVERTY_K * 1000) * 0.10 / 12);
+}
+
+function getIncome(id) {
+  const v = parseFloat(document.getElementById(id).value);
+  return isNaN(v) ? 0 : v;
+}
+
+// returns array of 10 IBR monthly payments indexed by PSLF year (year 1 = 2026)
+// year 1 (2026): uses 2025 AGI
+// year 2 (2027): uses 2026 AGI
+// years 3-10 (2028-2035): uses future AGI
+function getPaymentSchedule(extra) {
+  const agi2025 = getIncome('inc-2025-tufts') + getIncome('inc-2025-priv');
+  const agi2026 = getIncome('inc-2026-tufts') + getIncome('inc-2026-priv');
+  const futT = parseInt(document.getElementById('sl-fut-tufts').value);
+  const futP = parseInt(document.getElementById('sl-fut-priv').value);
+  const agiFuture = (futT + futP) * 1000;
+
+  const schedule = [];
+  for (let yr = 1; yr <= 10; yr++) {
+    let agi;
+    if (yr === 1) agi = agi2025 || 80000;
+    else if (yr === 2) agi = agi2026 || 80000;
+    else agi = agiFuture || 80000;
+
+    const ibrBase = ibrFromDollars(agi);
+    const monthly = ibrBase + (extra || 0);
+    schedule.push({ agi, ibrBase, monthly, year: START + yr - 1 });
+  }
+  return schedule;
+}
+
+function simPSLF(schedule) {
+  let bal = BALANCE, totalPaid = 0;
+  const bals = [bal], paids = [0];
+  const rows = [];
+
+  for (let yr = 0; yr < 10; yr++) {
+    const { agi, ibrBase, monthly, year } = schedule[yr];
+    let annualPaid = 0, annualInterest = 0;
+    for (let m = 0; m < 12; m++) {
+      const interest = bal * MR;
+      annualInterest += interest;
+      bal = bal + interest - monthly;
+      totalPaid += monthly;
+      annualPaid += monthly;
+    }
+    bals.push(Math.max(0, bal));
+    paids.push(totalPaid);
+    rows.push({ year, agi, monthly: ibrBase, annualPaid, annualInterest, balEnd: Math.max(0, bal) });
+  }
+  return { bals, paids, rows, forgiven: Math.max(0, bal), totalPaid };
+}
+
+function simIBR(schedule) {
+  // extends 25 years using future income for years 11+
+  const futT = parseInt(document.getElementById('sl-fut-tufts').value);
+  const futP = parseInt(document.getElementById('sl-fut-priv').value);
+  const agiFuture = (futT + futP) * 1000 || 80000;
+  const mFuture = ibrFromDollars(agiFuture);
+
+  let bal = BALANCE, totalPaid = 0;
+  const bals = [bal], paids = [0];
+  for (let yr = 0; yr < 25; yr++) {
+    const monthly = yr < 10 ? schedule[Math.min(yr,9)].ibrBase : mFuture;
+    for (let m = 0; m < 12; m++) {
+      bal = bal * (1 + MR) - monthly;
+      totalPaid += monthly;
+    }
+    bals.push(Math.max(0, bal));
+    paids.push(totalPaid);
+  }
+  const forgiven = Math.max(0, bal);
+  return { bals: bals.slice(0,11), paids: paids.slice(0,11), forgiven, totalPaid, taxBomb: Math.round(forgiven * 0.32) };
+}
+
+function simAgg(schedule, extra) {
+  let bal = BALANCE, totalPaid = 0;
+  const bals = [bal], paids = [0];
+  let paidOffMonth = null;
+
+  for (let yr = 0; yr < 30; yr++) {
+    const ibrBase = yr < 10 ? schedule[Math.min(yr,9)].ibrBase : schedule[9].ibrBase;
+    const monthly = ibrBase + extra;
+    for (let m = 0; m < 12; m++) {
+      const interest = bal * MR;
+      const pmt = Math.min(monthly, bal + interest);
+      bal = bal + interest - pmt;
+      totalPaid += pmt;
+      if (bal <= 0 && paidOffMonth === null) paidOffMonth = yr * 12 + m + 1;
+    }
+    bals.push(Math.max(0, bal));
+    paids.push(totalPaid);
+    if (bal <= 0) break;
+  }
+  while (bals.length < 11) { bals.push(0); paids.push(totalPaid); }
+  const paidOffYear = paidOffMonth !== null ? Math.ceil(START + paidOffMonth/12) : START + 30;
+  return { bals: bals.slice(0,11), paids: paids.slice(0,11), forgiven: 0, totalPaid, paidOffYear };
+}
+
+function update() {
+  const strat = document.getElementById('sl-strat').value;
+  const extra = strat === 'aggressive' ? parseInt(document.getElementById('sl-extra').value) : 0;
+
+  document.getElementById('extra-row').style.display = strat === 'aggressive' ? '' : 'none';
+  document.getElementById('out-extra').textContent = '$' + (parseInt(document.getElementById('sl-extra').value)||0).toLocaleString();
+
+  const futT = parseInt(document.getElementById('sl-fut-tufts').value);
+  const futP = parseInt(document.getElementById('sl-fut-priv').value);
+  document.getElementById('out-fut-tufts').textContent = '$' + futT + 'K';
+  document.getElementById('out-fut-priv').textContent = '$' + futP + 'K';
+
+  const agi2025 = getIncome('inc-2025-tufts') + getIncome('inc-2025-priv') || 80000;
+  const agi2026 = getIncome('inc-2026-tufts') + getIncome('inc-2026-priv') || 80000;
+  const agiFuture = (futT + futP) * 1000 || 80000;
+
+  const ibr2025 = ibrFromDollars(agi2025);
+  const ibr2026 = ibrFromDollars(agi2026);
+  const ibrFuture = ibrFromDollars(agiFuture);
+
+  document.getElementById('ibr-2025-display').textContent = '→ IBR: ' + fmtFull(ibr2025) + '/mo';
+  document.getElementById('ibr-2026-display').textContent = '→ IBR: ' + fmtFull(ibr2026) + '/mo';
+  document.getElementById('ibr-future-display').textContent = '→ IBR: ' + fmtFull(ibrFuture) + '/mo';
+
+  const schedule = getPaymentSchedule(0);
+  const pslf = simPSLF(schedule);
+  let alt = strat === 'ibr' ? simIBR(schedule) : strat === 'aggressive' ? simAgg(schedule, extra) : null;
+
+  // Payment spotlight — shows 2026 payment (based on 2025 return)
+  const cur2026Monthly = schedule[0].ibrBase + (strat === 'aggressive' ? extra : 0);
+  const moInt = Math.round(BALANCE * RATE / 12);
+  const toInterest = Math.min(cur2026Monthly, moInt);
+  const toPrincipal = Math.max(0, cur2026Monthly - moInt);
+  const shortfall = Math.max(0, moInt - cur2026Monthly);
+  const coversInt = cur2026Monthly >= moInt;
+
+  document.getElementById('ps-amount').textContent = fmtFull(cur2026Monthly);
+  document.getElementById('ps-breakdown').innerHTML = `
+    <div class="ps-row"><span class="psl">Goes to interest</span><span class="psv hi">${fmtFull(toInterest)}/mo</span></div>
+    <div class="ps-row"><span class="psl">Goes to principal</span><span class="psv ${toPrincipal>0?'green':'red'}">${fmtFull(toPrincipal)}/mo</span></div>
+    ${!coversInt ? `<div class="ps-row"><span class="psl">Balance grows by</span><span class="psv orange">+${fmtFull(shortfall)}/mo</span></div>` : ''}
+    <div class="ps-row" style="margin-top:2px;padding-top:6px;border-top:1px solid var(--border)"><span class="psl">Monthly interest on $721K</span><span class="psv">${fmtFull(moInt)}/mo</span></div>
+  `;
+
+  const showAlt = strat !== 'pslf';
+  document.getElementById('leg1').style.display = showAlt ? '' : 'none';
+  document.getElementById('leg2').style.display = showAlt ? '' : 'none';
+
+  const resYear = strat === 'pslf' ? 'Apr 2036' : strat === 'ibr' ? '2051' : '~ ' + alt.paidOffYear;
+  const avgAgi = Math.round((agi2025 + agi2026 + agiFuture) / 3);
+  const takeHome = Math.round(avgAgi * 0.68 / 12 - cur2026Monthly);
+
+  const vb = document.getElementById('verdict-box');
+  if (strat === 'pslf') {
+    vb.className = 'verdict-box pslf-wins';
+    vb.textContent = `PSLF: ${fmt(pslf.forgiven)} forgiven tax-free April 2036. Total paid over 10 years: ${fmt(pslf.totalPaid)}. Payment varies by year as income changes.`;
+  } else if (strat === 'ibr') {
+    vb.className = 'verdict-box alt-path';
+    vb.textContent = `IBR-only: ${fmt(alt.forgiven)} forgiven in 2051 — taxable. Est. tax bill: ${fmt(alt.taxBomb)}. PSLF saves ${fmt(alt.totalPaid - pslf.totalPaid)} and eliminates the tax event.`;
+  } else {
+    const diff = alt.totalPaid - pslf.totalPaid;
+    vb.className = diff > 0 ? 'verdict-box pslf-wins' : 'verdict-box alt-path';
+    vb.textContent = diff > 0
+      ? `PSLF saves ${fmt(diff)} vs. aggressive payoff at +${fmtFull(extra)}/mo. Payoff path clears ~ ${alt.paidOffYear}.`
+      : `At +${fmtFull(extra)}/mo extra, payoff costs ${fmt(Math.abs(diff))} more than PSLF but debt-free by ~ ${alt.paidOffYear}.`;
+  }
+
+  document.getElementById('metrics').innerHTML = `
+    <div class="metric-card"><div class="mc-label">2026 IBR payment</div><div class="mc-val green">${fmtFull(cur2026Monthly)}</div><div class="mc-sub">from 2025 tax return</div></div>
+    <div class="metric-card"><div class="mc-label">Monthly take-home</div><div class="mc-val">${fmtFull(Math.max(0,takeHome))}</div><div class="mc-sub">after ~32% tax + loan pmt</div></div>
+    <div class="metric-card"><div class="mc-label">Monthly interest</div><div class="mc-val orange">${fmtFull(moInt)}</div><div class="mc-sub ${coversInt?'green':'warn'}">${coversInt?'payment covers it':'payment below interest'}</div></div>
+    <div class="metric-card"><div class="mc-label">Resolution</div><div class="mc-val" style="font-size:16px">${resYear}</div><div class="mc-sub">${strat==='pslf'?'PSLF tax-free':strat==='ibr'?'IBR taxable':'fully paid off'}</div></div>
+    <div class="metric-card"><div class="mc-label">${strat==='aggressive'?'Total to pay off':'Forgiven tax-free'}</div><div class="mc-val ${strat==='aggressive'?'orange':'green'}">${strat==='aggressive'?fmt(alt.totalPaid):fmt(pslf.forgiven)}</div><div class="mc-sub ${strat==='aggressive'?'':'green'}">${strat==='aggressive'?'total cash':'no tax'}</div></div>
+    <div class="metric-card"><div class="mc-label">${strat==='ibr'?'Tax bomb 2051':strat==='pslf'?'Total paid (10 yrs)':'vs PSLF'}</div><div class="mc-val ${strat==='ibr'?'red':''}">${strat==='ibr'?fmt(alt.taxBomb):strat==='pslf'?fmt(pslf.totalPaid):(alt.totalPaid>pslf.totalPaid?'+':'')+fmt(alt.totalPaid-pslf.totalPaid)}</div><div class="mc-sub ${strat==='ibr'?'red':''}">${strat==='ibr'?'taxable event':strat==='pslf'?'then $0 owed':alt.totalPaid>pslf.totalPaid?'costs more than PSLF':'saves vs PSLF'}</div></div>
+  `;
+
+  // Year-by-year schedule
+  const tbody = document.getElementById('schedule-body');
+  tbody.innerHTML = '';
+  pslf.rows.forEach((row, i) => {
+    const isCurrent = row.year === 2026;
+    const grows = row.annualPaid < row.annualInterest;
+    const tr = document.createElement('tr');
+    if (isCurrent) tr.className = 'cur-year';
+    tr.innerHTML = `
+      <td class="td-year">${row.year}${isCurrent ? ' ←' : ''}</td>
+      <td class="td-income">${fmt(row.agi)}</td>
+      <td class="td-pmt">${fmtFull(row.monthly)}/mo</td>
+      <td>${fmtFull(row.annualPaid)}</td>
+      <td class="td-interest">${fmtFull(Math.round(row.annualInterest))}</td>
+      <td class="td-balance">${fmt(row.balEnd)} ${grows ? '<span class="td-grows">▲ growing</span>' : '<span class="td-grows" style="color:var(--green)">▼ shrinking</span>'}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+  // forgiveness row
+  const trFinal = document.createElement('tr');
+  trFinal.innerHTML = `<td class="td-year" style="color:var(--green)">Apr 2036</td><td colspan="4" style="color:var(--green);font-family:var(--mono);font-size:12px">PSLF forgiveness</td><td class="td-balance" style="color:var(--green)">${fmt(pslf.forgiven)} → $0</td>`;
+  tbody.appendChild(trFinal);
+
+  document.getElementById('sidebar-stats').innerHTML = `
+    <div class="stat-row"><span class="sl">Strategy</span><span class="sv purple">${strat==='pslf'?'PSLF':strat==='ibr'?'IBR only':'Aggressive'}</span></div>
+    <div class="stat-row"><span class="sl">Resolution</span><span class="sv">${resYear}</span></div>
+    <div class="stat-row"><span class="sl">PSLF forgiven</span><span class="sv green">${fmt(pslf.forgiven)}</span></div>
+    <div class="stat-row"><span class="sl">Tax on forgiveness</span><span class="sv ${strat==='ibr'?'red':'green'}">${strat==='ibr'?fmt(alt.taxBomb):'$0'}</span></div>
+    <div class="stat-row"><span class="sl">Total cash paid</span><span class="sv">${fmt(strat==='pslf'?pslf.totalPaid:alt.totalPaid)}</span></div>
+  `;
+
+  document.getElementById('note-box').textContent = `IBR = 10% of (AGI − $33,885) ÷ 12. The 2026 payment is driven by the 2025 tax return. Monthly interest on $721K is ${fmtFull(moInt)}. ${coversInt ? 'Her payment covers the interest — balance is shrinking.' : `Her payment covers ${fmtFull(toInterest)} of the ${fmtFull(moInt)} monthly interest — balance grows by ${fmtFull(shortfall)}/mo. Under PSLF this is fine: whatever remains in April 2036 is forgiven tax-free.`}`;
+
+  const labels = Array.from({length:11}, (_,i) => START + i);
+  const tickFn = v => v >= 1000 ? '$'+(v/1000).toFixed(1)+'M' : '$'+v+'K';
+  const gc = '#222', tc = '#666', tf = {family:'DM Mono',size:11};
+
+  if (c1) c1.destroy();
+  c1 = new Chart(document.getElementById('chart1').getContext('2d'), {
+    type: 'line',
+    data: { labels, datasets: [
+      {label:'PSLF',data:pslf.bals.map(v=>Math.round(v/1000)),borderColor:'#4ade80',backgroundColor:'rgba(74,222,128,0.05)',fill:true,tension:.35,pointRadius:3,borderWidth:2},
+      ...(showAlt ? [{label:'Alt',data:alt.bals.map(v=>Math.round(v/1000)),borderColor:'#fb923c',backgroundColor:'transparent',borderDash:[5,4],tension:.35,pointRadius:3,borderWidth:2}] : [])
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
+      scales:{x:{ticks:{color:tc,font:tf},grid:{color:gc}},y:{ticks:{callback:tickFn,color:tc,font:tf},grid:{color:gc}}}}
+  });
+
+  if (c2) c2.destroy();
+  c2 = new Chart(document.getElementById('chart2').getContext('2d'), {
+    type: 'line',
+    data: { labels, datasets: [
+      {label:'PSLF',data:pslf.paids.map(v=>Math.round(v/1000)),borderColor:'#4ade80',backgroundColor:'rgba(74,222,128,0.05)',fill:true,tension:.35,pointRadius:3,borderWidth:2},
+      ...(showAlt ? [{label:'Alt',data:alt.paids.map(v=>Math.round(v/1000)),borderColor:'#fb923c',backgroundColor:'rgba(251,146,60,0.05)',fill:true,tension:.35,pointRadius:3,borderWidth:2}] : [])
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
+      scales:{x:{ticks:{color:tc,font:tf},grid:{color:gc}},y:{ticks:{callback:tickFn,color:tc,font:tf},grid:{color:gc}}}}
+  });
+}
+
+update();
+</script>
+</body>
+</html>
