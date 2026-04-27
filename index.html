@@ -72,6 +72,10 @@ header .name { font-family: var(--mono); font-size: 12px; color: var(--purple); 
 .footer { border-top: 1px solid var(--border); padding: 20px 40px; display: flex; align-items: center; gap: 12px; }
 .footer-text { font-family: var(--mono); font-size: 11px; color: var(--dim); }
 .footer-dot { width: 3px; height: 3px; border-radius: 50%; background: var(--dim); }
+.site-nav { border-bottom: 1px solid var(--border); padding: 0 28px; display: flex; align-items: center; gap: 2px; background: var(--bg); flex-wrap: wrap; }
+.site-nav a { font-family: var(--mono); font-size: 11px; color: var(--dim); text-decoration: none; padding: 9px 14px; border-bottom: 2px solid transparent; transition: color .15s, border-color .15s; letter-spacing: .04em; }
+.site-nav a:hover { color: var(--muted); }
+.site-nav a.active { color: var(--text); border-bottom-color: var(--green); }
 </style>
 </head>
 <body>
@@ -157,6 +161,22 @@ header .name { font-family: var(--mono); font-size: 12px; color: var(--purple); 
   </a>
 
 </div>
+
+
+  <a class="card" href="./yoyo_next_steps.html">
+    <div class="card-num">04</div>
+    <div class="card-top">
+      <div class="card-title">Next steps</div>
+      <span class="card-badge badge-green">Post-call</span>
+    </div>
+    <div class="card-desc">Action items from the Etch Financial call, with corrections to the earlier model and a checklist to work through. Includes what changed, what was confirmed, and what Yolanda needs to do in order of urgency.</div>
+    <div class="card-features">
+      <div class="cf"><div class="cf-dot"></div><span>9 action items tagged by urgency — Do now, July 1, Annual, Decision</span></div>
+      <div class="cf"><div class="cf-dot"></div><span>Check items off as you complete them — progress saves in the browser</span></div>
+      <div class="cf"><div class="cf-dot"></div><span>Corrections table showing what the call changed from the earlier financial model</span></div>
+    </div>
+    <div class="card-cta">Open next steps <span class="arrow">→</span></div>
+  </a>
 
 <div class="footer">
   <span class="footer-text">tl790.github.io/yoyosteef</span>

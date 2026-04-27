@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>YoYo — Next Steps</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #0f0f0f; --surface: #181818; --surface2: #222; --border: #2a2a2a; --border2: #333;
+  --text: #f0ede8; --muted: #888; --dim: #555;
+  --green: #4ade80; --green-dim: rgba(74,222,128,0.08); --green-border: rgba(74,222,128,0.2);
+  --orange: #fb923c; --orange-dim: rgba(251,146,60,0.08); --orange-border: rgba(251,146,60,0.2);
+  --red: #f87171; --red-dim: rgba(248,113,113,0.08); --red-border: rgba(248,113,113,0.2);
+  --blue: #60a5fa; --blue-dim: rgba(96,165,250,0.08); --blue-border: rgba(96,165,250,0.2);
+  --purple: #a78bfa;
+  --mono: 'DM Mono', monospace; --sans: 'DM Sans', sans-serif;
+}
+[data-theme="light"] {
+  --bg: #f8f7f4; --surface: #ffffff; --surface2: #f0eeea; --border: #e2ddd6; --border2: #ccc8c0;
+  --text: #1a1917; --muted: #6b6760; --dim: #a09d98;
+  --green-dim: rgba(22,163,74,0.08); --green-border: rgba(22,163,74,0.2);
+  --orange-dim: rgba(194,65,12,0.08); --orange-border: rgba(194,65,12,0.2);
+  --red-dim: rgba(185,28,28,0.08); --red-border: rgba(185,28,28,0.2);
+  --blue-dim: rgba(29,78,216,0.08); --blue-border: rgba(29,78,216,0.2);
+}
+body { background: var(--bg); color: var(--text); font-family: var(--sans); font-size: 14px; line-height: 1.6; transition: background .2s, color .2s; }
+.site-nav { border-bottom: 1px solid var(--border); padding: 0 28px; display: flex; align-items: center; gap: 2px; background: var(--bg); flex-wrap: wrap; }
+.site-nav a { font-family: var(--mono); font-size: 11px; color: var(--dim); text-decoration: none; padding: 9px 14px; border-bottom: 2px solid transparent; transition: color .15s, border-color .15s; letter-spacing: .04em; }
+.site-nav a:hover { color: var(--muted); }
+.site-nav a.active { color: var(--text); border-bottom-color: var(--green); }
+header { border-bottom: 1px solid var(--border); padding: 18px 32px; display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; }
+header h1 { font-family: var(--mono); font-size: 12px; font-weight: 400; color: var(--muted); letter-spacing: .08em; text-transform: uppercase; }
+header .name { font-family: var(--mono); font-size: 12px; color: var(--purple); }
+.hbtn { margin-left: auto; font-family: var(--mono); font-size: 10px; padding: 4px 12px; border-radius: 3px; border: 1px solid var(--border2); background: transparent; color: var(--muted); cursor: pointer; transition: all .15s; letter-spacing: .04em; }
+.hbtn:hover { color: var(--text); border-color: var(--muted); }
+.container { max-width: 760px; margin: 0 auto; padding: 36px 32px 80px; }
+.source-strip { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 12px 16px; margin-bottom: 28px; display: flex; gap: 24px; flex-wrap: wrap; }
+.ss-field { display: flex; flex-direction: column; gap: 2px; }
+.ss-label { font-family: var(--mono); font-size: 10px; color: var(--dim); text-transform: uppercase; letter-spacing: .07em; }
+.ss-val { font-size: 13px; color: var(--text); }
+.section-title { font-family: var(--mono); font-size: 10px; color: var(--dim); text-transform: uppercase; letter-spacing: .1em; margin: 28px 0 12px; }
+.alert { border-radius: 6px; padding: 14px 18px; font-size: 13px; line-height: 1.7; border: 1px solid; margin-bottom: 16px; }
+.alert-red { background: var(--red-dim); border-color: var(--red-border); color: #fca5a5; }
+.numbers-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(145px, 1fr)); gap: 10px; margin-bottom: 8px; }
+.num-card { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 12px 14px; }
+.nc-label { font-family: var(--mono); font-size: 10px; color: var(--dim); text-transform: uppercase; letter-spacing: .07em; margin-bottom: 4px; }
+.nc-val { font-family: var(--mono); font-size: 17px; font-weight: 500; }
+.nc-val.green { color: var(--green); }
+.nc-val.orange { color: var(--orange); }
+.nc-val.red { color: var(--red); }
+.nc-val.purple { color: var(--purple); }
+.nc-sub { font-size: 11px; color: var(--dim); margin-top: 2px; }
+.step-list { display: flex; flex-direction: column; gap: 10px; }
+.step { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 16px 18px; display: flex; gap: 16px; align-items: flex-start; cursor: pointer; transition: border-color .15s; user-select: none; }
+.step:hover { border-color: var(--border2); }
+.step.done { opacity: 0.5; }
+.step.done .step-text { text-decoration: line-through; text-decoration-color: var(--dim); color: var(--dim); }
+.step-check { width: 20px; height: 20px; border-radius: 4px; border: 1.5px solid var(--border2); flex-shrink: 0; margin-top: 1px; display: flex; align-items: center; justify-content: center; transition: all .15s; }
+.step.done .step-check { background: var(--green); border-color: var(--green); }
+.step-check-mark { display: none; font-size: 11px; color: #0f0f0f; font-weight: 700; }
+.step.done .step-check-mark { display: block; }
+.step-body { flex: 1; }
+.step-top { display: flex; align-items: flex-start; gap: 10px; flex-wrap: wrap; margin-bottom: 5px; }
+.step-text { font-size: 13px; font-weight: 500; color: var(--text); flex: 1; line-height: 1.4; }
+.step-tag { font-family: var(--mono); font-size: 9px; padding: 2px 8px; border-radius: 3px; border: 1px solid; flex-shrink: 0; white-space: nowrap; text-transform: uppercase; letter-spacing: .06em; }
+.tag-now { background: var(--red-dim); color: var(--red); border-color: var(--red-border); }
+.tag-july { background: var(--orange-dim); color: var(--orange); border-color: var(--orange-border); }
+.tag-ongoing { background: var(--green-dim); color: var(--green); border-color: var(--green-border); }
+.tag-decision { background: var(--blue-dim); color: var(--blue); border-color: var(--blue-border); }
+.step-detail { font-size: 12px; color: var(--muted); line-height: 1.65; }
+.step.done .step-detail { color: var(--dim); }
+.corrections-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.corrections-table th { font-family: var(--mono); font-size: 10px; color: var(--dim); text-transform: uppercase; letter-spacing: .07em; padding: 8px 12px; text-align: left; border-bottom: 1px solid var(--border); background: var(--surface2); font-weight: 400; }
+.corrections-table td { padding: 10px 12px; border-bottom: 1px solid var(--border); vertical-align: top; font-size: 12px; }
+.corrections-table tr:last-child td { border-bottom: none; }
+.td-old { color: var(--red); font-family: var(--mono); }
+.td-new { color: var(--green); font-family: var(--mono); }
+.td-label { color: var(--muted); }
+</style>
+</head>
+<body>
+<header>
+  <h1>Next Steps —</h1>
+  <span class="name">YoYo · Post Etch Financial Call</span>
+  <button class="hbtn" id="theme-btn" onclick="toggleTheme()">light mode</button>
+</header>
+<nav class="site-nav">
+  <a href="https://tl790.github.io/yoyosteef/index.html">Home</a>
+  <a href="https://tl790.github.io/yoyosteef/yoyo_financial_model.html">Financial model</a>
+  <a href="https://tl790.github.io/yoyosteef/yoyo_pslf_checklist.html">PSLF checklist</a>
+  <a href="https://tl790.github.io/yoyosteef/yoyo_meeting_notes.html">Meeting notes</a>
+  <a href="https://tl790.github.io/yoyosteef/yoyo_next_steps.html" class="active">Next steps</a>
+</nav>
+
+<div class="container">
+
+  <div class="source-strip">
+    <div class="ss-field"><div class="ss-label">Source</div><div class="ss-val">Etch Financial call with Ryan</div></div>
+    <div class="ss-field"><div class="ss-label">Date</div><div class="ss-val">April 28, 2026</div></div>
+    <div class="ss-field"><div class="ss-label">Participants</div><div class="ss-val">Yolanda, Marta (advisor), Tim, Ryan (Etch)</div></div>
+    <div class="ss-field"><div class="ss-label">Decision</div><div class="ss-val" style="color:var(--green)">PSLF confirmed as best path</div></div>
+  </div>
+
+  <div class="alert alert-red">
+    <strong>SAVE forbearance wipes out the full-time year.</strong> The legal injunction against SAVE (July 2024–March 2026) means those months don't count toward PSLF — including the year Yolanda was full-time at Tufts (July 2024–June 2025). She is starting at zero. The PSLF Buyback Program could theoretically recover those months at month 120 but has a 3-year backlog — Ryan's guidance: don't bank on it.
+  </div>
+
+  <div class="section-title">The numbers that matter</div>
+  <div class="numbers-grid">
+    <div class="num-card"><div class="nc-label">PSLF saves</div><div class="nc-val green">$524K</div><div class="nc-sub">tax-free, ~10 years</div></div>
+    <div class="num-card"><div class="nc-label">IBR now (old)</div><div class="nc-val">~$1,576</div><div class="nc-sub">15% at $150K income</div></div>
+    <div class="num-card"><div class="nc-label">RAP plan (Jul 1)</div><div class="nc-val green">~$1,250</div><div class="nc-sub">switch on July 1</div></div>
+    <div class="num-card"><div class="nc-label">Private threshold</div><div class="nc-val orange">+$85K/yr</div><div class="nc-sub">to beat PSLF</div></div>
+    <div class="num-card"><div class="nc-label">Forgiveness year</div><div class="nc-val purple">~2036</div><div class="nc-sub">starting from now</div></div>
+    <div class="num-card"><div class="nc-label">Total balance</div><div class="nc-val red">$704K</div><div class="nc-sub">as of April 2026</div></div>
+  </div>
+
+  <div class="section-title">Action items — click to mark done</div>
+  <div class="step-list">
+
+    <div class="step" onclick="toggle(this)">
+      <div class="step-check"><span class="step-check-mark">✓</span></div>
+      <div class="step-body">
+        <div class="step-top"><span class="step-text">Switch back to 4 days/week at Tufts</span><span class="step-tag tag-now">Do now</span></div>
+        <div class="step-detail">Currently 8 sessions over 3 days. 4 days removes all ambiguity around the 30-hr/week full-time threshold and makes HR certification straightforward.</div>
+      </div>
+    </div>
+
+    <div class="step" onclick="toggle(this)">
+      <div class="step-check"><span class="step-check-mark">✓</span></div>
+      <div class="step-body">
+        <div class="step-top"><span class="step-text">Get Nicholas White Jr. at Tufts to certify full-time status on a new ECF</span><span class="step-tag tag-now">Do now</span></div>
+        <div class="step-detail">Nicholas White Jr. — TSS Administrative Coordinator — tss@tufts.edu — (617) 627-5503. Needs to check the full-time box and write 30+ hours. Ryan: this one signature saves ~$15K in payments. Bring cookies.</div>
+      </div>
+    </div>
+
+    <div class="step" onclick="toggle(this)">
+      <div class="step-check"><span class="step-check-mark">✓</span></div>
+      <div class="step-body">
+        <div class="step-top"><span class="step-text">Log into studentaid.gov and check current PSLF qualifying payment count</span><span class="step-tag tag-now">Do now</span></div>
+        <div class="step-detail">Go to studentaid.gov → My Activity → PSLF payment tracker. Confirm the count and screenshot it as a baseline. Given SAVE forbearance it will likely show 0.</div>
+      </div>
+    </div>
+
+    <div class="step" onclick="toggle(this)">
+      <div class="step-check"><span class="step-check-mark">✓</span></div>
+      <div class="step-body">
+        <div class="step-top"><span class="step-text">Recertify income using current pay stubs — not last year's tax return</span><span class="step-tag tag-now">Do now</span></div>
+        <div class="step-detail">Income dropped from $250K to ~$150K. Ryan: upload pay stubs to EdFinancial instead of allowing an IRS pull. They use whichever income is lower. This drops the IBR payment immediately rather than waiting for the next tax cycle.</div>
+      </div>
+    </div>
+
+    <div class="step" onclick="toggle(this)">
+      <div class="step-check"><span class="step-check-mark">✓</span></div>
+      <div class="step-body">
+        <div class="step-top"><span class="step-text">Decide on Perkins loan consolidation</span><span class="step-tag tag-now">Do now</span></div>
+        <div class="step-detail">$11K–12K in Perkins at 5% (UCSF). Option A: Consolidate into Direct loans — brings them into PSLF, rate goes to ~6.5% (doesn't matter for forgiveness), but LOSES Perkins cancellation. Option B: Leave separate, pursue Perkins cancellation through UCSF (up to 100% over 5 teaching years). Ryan: consolidate if committed to PSLF — $524K forgiveness vs $11K cancellation is an easy call.</div>
+      </div>
+    </div>
+
+    <div class="step" onclick="toggle(this)">
+      <div class="step-check"><span class="step-check-mark">✓</span></div>
+      <div class="step-body">
+        <div class="step-top"><span class="step-text">Apply for RAP (Repayment Assistance Plan) on July 1, 2026</span><span class="step-tag tag-july">July 1</span></div>
+        <div class="step-detail">Launches July 1. ~$1,250/mo vs $1,576 on IBR. PSLF-eligible. Log into studentaid.gov July 1 and select lowest available IDR option. Critical: do NOT leave IBR before July 1 — switching causes interest capitalization, merging the $600K principal and $100K accrued interest into a larger base.</div>
+      </div>
+    </div>
+
+    <div class="step" onclick="toggle(this)">
+      <div class="step-check"><span class="step-check-mark">✓</span></div>
+      <div class="step-body">
+        <div class="step-top"><span class="step-text">Maximize pre-tax 401K contributions to lower AGI and IBR payment</span><span class="step-tag tag-july">Soon</span></div>
+        <div class="step-detail">Marta to follow up on Tufts retirement match. Every pre-tax 401K dollar reduces AGI → reduces IBR/RAP payment. Also reduces tax bill. Ryan flagged this as one of the most effective levers available.</div>
+      </div>
+    </div>
+
+    <div class="step" onclick="toggle(this)">
+      <div class="step-check"><span class="step-check-mark">✓</span></div>
+      <div class="step-body">
+        <div class="step-top"><span class="step-text">Resubmit ECF every April — calendar this permanently</span><span class="step-tag tag-ongoing">Annual</span></div>
+        <div class="step-detail">Submit Employment Certification Form every year at studentaid.gov. Payment count should rise by exactly 12. If it rises by 10–11, there's an error — catch it now, not at year 9. Keep copies of every approved ECF forever.</div>
+      </div>
+    </div>
+
+    <div class="step" onclick="toggle(this)">
+      <div class="step-check"><span class="step-check-mark">✓</span></div>
+      <div class="step-body">
+        <div class="step-top"><span class="step-text">Make final commitment: PSLF path vs. private practice</span><span class="step-tag tag-decision">Decision</span></div>
+        <div class="step-detail">Ryan's number: PSLF saves $524K. Private practice needs to pay $85K+/yr more (after taxes, benefits, self-employment tax at 15.3%) to offset. She could pay off in ~6 years aggressive private practice, but quality of life suffers significantly. Ryan, Marta, and Tim all lean PSLF. Yolanda's call.</div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="section-title">What the call corrected from our earlier model</div>
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:6px;overflow:hidden">
+    <table class="corrections-table">
+      <thead><tr><th>Item</th><th>What we had</th><th>Corrected</th></tr></thead>
+      <tbody>
+        <tr><td class="td-label">IBR rate</td><td class="td-old">10% (new IBR)</td><td class="td-new">15% — old IBR for pre-2014 loans</td></tr>
+        <tr><td class="td-label">Poverty threshold</td><td class="td-old">225% FPL (~$33.9K)</td><td class="td-new">150% FPL (~$18K single filer)</td></tr>
+        <tr><td class="td-label">IBR at $150K</td><td class="td-old">~$973/mo</td><td class="td-new">~$1,576/mo (Ryan confirmed)</td></tr>
+        <tr><td class="td-label">PSLF months logged</td><td class="td-old">0 (never enrolled)</td><td class="td-new">ECF filed Jul 2024 — but SAVE forbearance wipes out qualifying months anyway</td></tr>
+        <tr><td class="td-label">RAP plan</td><td class="td-old">Not modeled</td><td class="td-new">Launches Jul 1 — ~$1,250/mo, PSLF-eligible</td></tr>
+        <tr><td class="td-label">COVID forbearance</td><td class="td-old">Not relevant (not at nonprofit)</td><td class="td-new">Confirmed — Mar 2020–Aug 2023 counted but Yolanda wasn't at a nonprofit then, so no impact</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>
+
+<script>
+function toggle(el) { el.classList.toggle('done'); save(); }
+function save() {
+  const state = [...document.querySelectorAll('.step')].map(s => s.classList.contains('done'));
+  try { localStorage.setItem('yoyo-next-steps', JSON.stringify(state)); } catch(e) {}
+}
+function load() {
+  try {
+    const saved = localStorage.getItem('yoyo-next-steps');
+    if (!saved) return;
+    const state = JSON.parse(saved);
+    const steps = [...document.querySelectorAll('.step')];
+    state.forEach((done, i) => { if (done && steps[i]) steps[i].classList.add('done'); });
+  } catch(e) {}
+}
+function toggleTheme() {
+  const html = document.documentElement;
+  const next = html.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+  html.setAttribute('data-theme', next);
+  document.getElementById('theme-btn').textContent = next === 'light' ? 'dark mode' : 'light mode';
+  localStorage.setItem('yoyo-theme', next);
+}
+(function() {
+  const saved = localStorage.getItem('yoyo-theme') || 'dark';
+  document.documentElement.setAttribute('data-theme', saved);
+  window.addEventListener('DOMContentLoaded', function() {
+    const btn = document.getElementById('theme-btn');
+    if (btn) btn.textContent = saved === 'light' ? 'dark mode' : 'light mode';
+    load();
+  });
+})();
+</script>
+</body>
+</html>

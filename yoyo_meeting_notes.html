@@ -114,9 +114,11 @@ textarea::placeholder { color: var(--dim); }
 </header>
 
 <nav class="site-nav">
+  <a href="https://tl790.github.io/yoyosteef/index.html">Home</a>
   <a href="https://tl790.github.io/yoyosteef/yoyo_financial_model.html">Financial model</a>
   <a href="https://tl790.github.io/yoyosteef/yoyo_pslf_checklist.html">PSLF checklist</a>
   <a href="https://tl790.github.io/yoyosteef/yoyo_meeting_notes.html" class="active">Meeting notes</a>
+  <a href="https://tl790.github.io/yoyosteef/yoyo_next_steps.html">Next steps</a>
 </nav>
 
 <div class="toolbar">
@@ -333,9 +335,42 @@ function toggleTheme() {
     if (btn) btn.textContent = saved === 'light' ? 'dark mode' : 'light mode';
     document.getElementById('date-display').textContent = new Date().toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'});
     buildQuestions();
+    prefillFromCall();
     loadSaved();
   });
 })();
+const CALL_ANSWERS = {
+  'q1': { short: 'Uncertain — depends on Tufts HR signing off. Switch back to 4 days to be safe.', long: 'Ryan confirmed it comes down entirely to whether Tufts HR checks the full-time box and writes 30+ hours. Yolanda does 8 sessions (meets threshold) but only 3 days. Ryan said if the sessions = 30+ hrs, they should sign off. Recommendation: switch back to 4 days/week to eliminate any ambiguity. Contact Nicholas White Jr. (tss@tufts.edu, 617-627-5503). Butter them up — this one signature saves ~$15K in payments.' },
+  'q2': { short: 'Confirmed — Tufts University directly. EIN 042103634 already on file from July 2024 ECF.', long: 'ECF already filed July 2024, certified by Nicholas White Jr., TSS Administrative Coordinator. Employer of record is Tufts University, 80 George Street, Medford MA 02155. This box is checked.' },
+  'q3': { short: 'No retroactive recovery — SAVE forbearance (Jul 2024–Mar 2026) wipes out the full-time year.', long: 'Ryan confirmed: the SAVE legal injunction forbearance ran July 2024–March 2026. Any months in SAVE forbearance do NOT count toward PSLF. This covers Yolanda\'s entire full-time year at Tufts (Jul 2024–Jun 2025). PSLF Buyback Program could theoretically recover these months at month 120, but it currently has a 3-year backlog and Ryan strongly advises not to rely on it. Starting at zero.' },
+  'q4': { short: 'Stay on IBR now. Switch to RAP on July 1, 2026 — estimated $1,250/mo, PSLF-eligible.', long: 'SAVE is gone. PAYE is ending in 2028 and Yolanda was denied (likely prior year income too high). Ryan recommends staying on IBR until July 1 when RAP (Repayment Assistance Plan) launches. RAP is PSLF-eligible and estimated at $1,250/mo vs $1,576/mo on IBR. Important: do NOT switch off IBR before July 1 — switching capitalizes interest, combining the $600K principal and $100K accrued interest into one bigger balance.' },
+  'q5': { short: 'Yes — payments made on SAVE while it was active count. The forbearance period does not.', long: 'Ryan confirmed: if you were on SAVE when it was active and making payments, those count. The issue is the injunction forbearance period (Jul 2024–Mar 2026) — those months in forbearance don\'t count regardless of plan. Not the plan itself that\'s the problem, it\'s the forced forbearance during the legal fight.' },
+  'q6': { short: 'Recommend doing it online at studentaid.gov/pslf — employer can sign electronically.', long: 'Ryan recommends submitting ECF annually. Go to studentaid.gov/pslf. Employer signs electronically — no printing needed. Key contact at Tufts: Nicholas White Jr. (tss@tufts.edu). Payment count should increase by 12 each year. If it only goes up by 10-11, there\'s an error to catch early. First ECF already filed July 2024 — needs resubmission to cover current period.' },
+  'q7': { short: 'Yes — any amount on IDR counts as a qualifying payment, even $0.', long: 'Ryan confirmed: as long as you\'re on an IDR plan, employed full-time at a qualifying employer, the payment counts regardless of amount. Even $0 IBR payments count. The balance growing doesn\'t matter — whatever is owed at month 120 is forgiven tax-free.' },
+  'q8': { short: 'Prior forbearance doesn\'t count. Avoid future forbearance unless it\'s a qualifying type.', long: 'COVID forbearance (Mar 2020–Aug 2023) was special — those DID count regardless of employment or payment. SAVE injunction forbearance (Jul 2024–Mar 2026) did NOT count. Standard voluntary forbearance never counts. Going forward, stay in repayment on IBR/RAP and avoid forbearance.' },
+  'q9': { short: 'Recertify annually. Can use pay stubs instead of tax return if current income is lower.', long: 'Ryan key tip: if current income is lower than last year\'s tax return, upload pay stubs instead. They\'ll use whichever is lower. This matters because Yolanda\'s income has dropped from $250K to $150K — using current pay stubs vs prior return could meaningfully lower her payment. Also: maximize pre-tax 401K contributions to lower AGI and further reduce IBR payment.' },
+  'q10': { short: 'Yes — private practice income does not affect PSLF eligibility. Only affects IBR payment amount.', long: 'Ryan confirmed: she can continue working at Newton Dentistry and North Street Pediatrics. As income increases, IBR payment goes up, but PSLF eligibility is unaffected. Marta also working on ensuring she\'s getting full retirement match from Tufts — those pre-tax contributions reduce AGI and lower IBR payment.' },
+  'q11': { short: 'Old IBR = 15% of (AGI minus 150% poverty line ~$18K). At $150K: ~$1,576/mo.', long: 'Ryan corrected the earlier calculation: Yolanda is on OLD IBR (pre-2014 loans) = 15% of discretionary income. Poverty threshold is 150% FPL (~$18K single filer), not 225%. At $150K AGI: ($150K - $18K) x 15% / 12 = ~$1,650/mo. Ryan quoted $1,576 (slight difference due to exact poverty table). At $250K: ~$2,826/mo. AGI can be reduced by maxing 401K pre-tax contributions.' },
+  'q12': { short: 'PSLF still wins unless she earns $85K+ MORE per year in private practice (after tax, benefits, self-employment tax).', long: 'Ryan\'s threshold: PSLF saves $524K over 10 years. To offset that, private practice needs to pay ~$52K/yr more (just forgiveness). Once you add tax savings, benefits (health, retirement), and self-employment tax (~15.3%), the real threshold is $75K–$85K/yr more. Ryan and Marta both said she probably couldn\'t hit that without maxing out private practice hours and sacrificing quality of life. Could theoretically pay off in 6 years aggressive private practice, but nothing left for anything else.' },
+  'q13': { short: 'Consolidate Perkins into Direct loans IF committed to PSLF. Rate goes to ~6.5% but doesn\'t matter for forgiveness.', long: 'Ryan: $11K-12K in Perkins at 5% not PSLF-eligible as-is. Consolidating brings them into PSLF fold. Rate increases to ~6.5% weighted average. Ryan said: if you\'re dead set on PSLF, consolidate. If not sure, don\'t — interest rate goes up. Warning: consolidating Perkins into Direct loans means you lose Perkins Cancellation eligibility. Weigh PSLF value vs Perkins cancellation (100% over 5 years of dental faculty service).' },
+  'q14': { short: 'Yes — directly through UCSF, separately from EdFinancial. Needs to be done annually.', long: 'Perkins loans are held by UCSF, not EdFinancial. Cancellation is handled directly with UCSF financial aid. BUT: if she consolidates Perkins into Direct loans (for PSLF), she loses Perkins cancellation eligibility entirely. Decision: $11K Perkins cancellation over 5 years vs bringing them into $524K PSLF forgiveness. PSLF math wins if she stays the course.' },
+  'q15': { short: 'Subcontracted through Marta (financial advisor). Not charged extra. Ryan runs Etch Financial, Pittsburgh.', long: 'Ryan has 10 years experience in student loan debt management. Marta subcontracted him as a specialist. Yolanda not charged extra beyond Marta\'s existing advisor relationship. Ryan works with financial advisors\' clients on loan-specific strategy. Largest case on record: ~$900K forgiveness. Fee arrangement is between Marta and Etch Financial.' },
+  'q16': { short: 'Re-verify payment count within 30 days of any transfer. Keep all records.', long: 'Ryan: if servicer changes, immediately verify qualifying payment count transferred correctly. Servicer errors at transfer are common. This is why annual ECF submission is so important — it creates a paper trail that\'s harder to lose in a transfer. Keep copies of every approved ECF and every payment count confirmation.' },
+};
+
+function prefillFromCall() {
+  const existing = localStorage.getItem('yoyo-meeting-notes');
+  if (existing) return; // don't overwrite if user has already filled things in
+  const data = {
+    meta: { date: 'April 28, 2026', advisor: 'Ryan — Etch Financial', format: 'Zoom', followup: 'July 1 — switch to RAP plan' },
+    answers: {},
+    openNotes: 'Key numbers from call:\n- PSLF saves $524K over 10 years (tax-free)\n- Old IBR = 15% of discretionary, $1,576/mo at $150K income\n- RAP plan launches July 1, 2026 — estimated $1,250/mo\n- Private practice threshold: $85K/yr more needed to beat PSLF\n- SAVE forbearance (Jul 2024–Mar 2026) = zero PSLF credit for full-time Tufts year\n- Perkins: consolidate into Direct loans if PSLF path confirmed (loses Perkins cancellation)\n\nAction items from Ryan:\n1. Switch back to 4 days/week at Tufts\n2. Get Nicholas White Jr. (tss@tufts.edu) to certify full-time on ECF\n3. Apply for RAP plan July 1\n4. Resubmit ECF annually\n5. Decide on Perkins consolidation',
+    savedAt: new Date().toISOString()
+  };
+  Object.keys(CALL_ANSWERS).forEach(id => { data.answers[id] = CALL_ANSWERS[id]; });
+  try { localStorage.setItem('yoyo-meeting-notes', JSON.stringify(data)); } catch(e) {}
+}
+
 </script>
 </body>
 </html>

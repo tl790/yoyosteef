@@ -157,9 +157,11 @@ select { width: 100%; background: var(--surface2); color: var(--text); border: 1
   <button id="theme-btn" onclick="toggleTheme()" style="margin-left:8px;font-family:var(--mono);font-size:10px;padding:3px 10px;border-radius:3px;border:1px solid var(--border2);background:transparent;color:var(--muted);cursor:pointer;letter-spacing:.05em">light mode</button>
 </header>
 <nav class="site-nav">
+  <a href="https://tl790.github.io/yoyosteef/index.html">Home</a>
   <a href="https://tl790.github.io/yoyosteef/yoyo_financial_model.html" class="active">Financial model</a>
   <a href="https://tl790.github.io/yoyosteef/yoyo_pslf_checklist.html">PSLF checklist</a>
   <a href="https://tl790.github.io/yoyosteef/yoyo_meeting_notes.html">Meeting notes</a>
+  <a href="https://tl790.github.io/yoyosteef/yoyo_next_steps.html">Next steps</a>
 </nav>
 
 <div class="layout">
@@ -316,7 +318,7 @@ select { width: 100%; background: var(--surface2); color: var(--text); border: 1
 </div>
 
 <script>
-const BALANCE = 721333, RATE = 0.066, MR = RATE/12, POVERTY_K = 33.885, START = 2026;
+const BALANCE = 721333, RATE = 0.066, MR = RATE/12, POVERTY_K = 18.0, START = 2026; // Old IBR: 150% FPL ~$18K single
 let c1, c2;
 
 function toggleTheme() {
@@ -347,7 +349,7 @@ function fmtFull(n) { return '$'+Math.round(n).toLocaleString(); }
 
 // agi in full dollars
 function ibrFromDollars(agi) {
-  return Math.round(Math.max(0, agi - POVERTY_K * 1000) * 0.10 / 12);
+  return Math.round(Math.max(0, agi - POVERTY_K * 1000) * 0.15 / 12); // Old IBR = 15% for pre-2014 loans
 }
 
 function getIncome(id) {
@@ -555,7 +557,7 @@ function update() {
     <div class="stat-row"><span class="sl">Total cash paid</span><span class="sv">${fmt(strat==='pslf'?pslf.totalPaid:alt.totalPaid)}</span></div>
   `;
 
-  document.getElementById('note-box').textContent = `IBR = 10% of (AGI − $33,885) ÷ 12. The 2026 payment is driven by the 2025 tax return. Monthly interest on $721K is ${fmtFull(moInt)}. ${coversInt ? 'Her payment covers the interest — balance is shrinking.' : `Her payment covers ${fmtFull(toInterest)} of the ${fmtFull(moInt)} monthly interest — balance grows by ${fmtFull(shortfall)}/mo. Under PSLF this is fine: whatever remains in April 2036 is forgiven tax-free.`}`;
+  document.getElementById('note-box').textContent = `IBR (old) = 15% of (AGI − $18,000) ÷ 12. Pre-2014 loans use old IBR at 15%, not 10%. The 2026 payment is driven by the 2025 tax return. Monthly interest on $721K is ${fmtFull(moInt)}. ${coversInt ? 'Her payment covers the interest — balance is shrinking.' : `Her payment covers ${fmtFull(toInterest)} of the ${fmtFull(moInt)} monthly interest — balance grows by ${fmtFull(shortfall)}/mo. Under PSLF this is fine: whatever remains in April 2036 is forgiven tax-free.`}`;
 
   const labels = Array.from({length:11}, (_,i) => START + i);
   const tickFn = v => v >= 1000 ? '$'+(v/1000).toFixed(1)+'M' : '$'+v+'K';
